@@ -1,7 +1,8 @@
 # ADR-0003: Colori dei nickname deterministici lato client
 
 **Data:** 2026-09-06
-**Stato:** accettata
+**Stato:** accettata · **condizione di revisione avverata il 2026-09-08** (in fondo).
+Il meccanismo non cambia; cambiano i parametri della palette.
 
 ## Contesto
 
@@ -67,3 +68,25 @@ vedrebbe di un colore diverso da come lo vedono gli altri.
 
 **Da rivedere se:** si aggiunge il tema chiaro (serve una seconda palette, indicizzata
 allo stesso modo).
+
+## Revisione del 2026-09-08 — la condizione si è avverata
+
+Il tema chiaro è stato progettato ([mockup](../assets/mockup-interfaccia.html)), quindi la
+seconda palette esiste. Contestualmente le palette sono passate da **16 a 20 voci**, una per
+posto nella stanza. **Il meccanismo deciso qui non cambia**: FNV-1a a 32 bit sul nickname
+normalizzato, modulo la lunghezza della palette, calcolato dal client senza coinvolgere il
+server. Cambiano due parametri, entrambi documentati in
+[05 §6](../05-client-desktop.md):
+
+1. **Due palette invece di una**, con gli stessi indici e la stessa lunghezza: il colore
+   dipende ora dal nickname **e** dal tema. La proprietà che conta — stesso nickname, stesso
+   colore su tutti i client — resta vera a parità di tema, che è l'unico caso che serve:
+   due persone che guardano lo stesso schermo condividono anche il tema.
+2. **Venti voci invece di sedici.** Non risolve le collisioni e non era inteso a farlo: con
+   la stanza piena i colori distinti attesi passano da 11,6 a 12,8. Resta vero, e va
+   ripetuto, che **il colore non identifica nessuno** — il nickname è sempre scritto accanto.
+
+Va segnalata una conseguenza pratica del cambio di modulo: `hash % 20` assegna colori
+diversi da `hash % 16` a **tutti** i nickname, non solo ai quattro nuovi. Nulla è
+persistente, quindi non rompe niente, ma in sviluppo dà l'impressione che qualcosa si sia
+guastato.

@@ -84,9 +84,13 @@ Krypta/
 │   │   │   ├── RoomManager.cs  Dizionario concorrente delle stanze
 │   │   │   ├── Participant.cs  Una connessione: socket, nickname, coda di invio
 │   │   │   └── NicknameAllocator.cs   Disambiguazione emy -> emy2 -> emy3
-│   │   ├── Sockets/
+│   │   ├── Connections/
 │   │   │   ├── ConnectionHandler.cs   Ciclo di vita di una connessione
+│   │   │   ├── ConnectionRegistry.cs  Connessioni vive, usate dall'heartbeat
+│   │   │   └── HeartbeatService.cs    Ping e timeout dei client muti
+│   │   ├── Messaging/
 │   │   │   ├── MessageDispatcher.cs   Parsing e instradamento
+│   │   │   ├── ProtocolMessageSender.cs  Serializzazione e accodamento
 │   │   │   └── CommandHandler.cs      /NameRoom, /Users, /ClearRoom
 │   │   ├── RateLimiting/
 │   │   │   ├── JoinRateLimiter.cs     Per IP: 5 tentativi / 3 min, blocco 2 min

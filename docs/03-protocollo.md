@@ -1573,6 +1573,7 @@ Nessun errore applicativo chiude la connessione, tranne `SERVER_SHUTDOWN`.
 | `MessageMaxLength` | 2000 | Caratteri **del testo in chiaro**, contati come li conta .NET (`string.Length`, cioè unità di codice UTF-16). Lo verifica il client: il server non può |
 | `MaxCiphertextBytes` | 8192 | Limite sull'involucro cifrato, **misurato sui byte decodificati** (§9.1), non sulla stringa base64. È l'unico limite di contenuto che il server può controllare |
 | `MaxFrameBytes` | 16384 | Dimensione dell'intero frame WebSocket in byte. Un frame più grande viene rifiutato **senza essere deserializzato** |
+| `SendQueueCapacity` | 100 | Messaggi non ancora scritti per connessione; oltre il limite il client lento viene disconnesso |
 | `RoomKeyBytes` | 32 | AES-256 |
 | `RekeyMinIntervalSeconds` | 30 | Fra due `/GenerateKey`, **per stanza** e non per connessione |
 | `PreviousKeyWindowSeconds` | 60 | Per quanto il ricevente tiene la chiave dell'epoca precedente, per i messaggi in volo (§7bis.11) |

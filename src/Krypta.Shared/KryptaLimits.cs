@@ -18,6 +18,7 @@ public static class KryptaLimits
     public const int MessageMaxLength = 2_000;
     public const int MaxCiphertextBytes = 8_192;
     public const int MaxFrameBytes = 16_384;
+    public const int SendQueueCapacity = 100;
 
     public const int RoomKeyBytes = 32;
     public const int PublicKeyBytes = 65;

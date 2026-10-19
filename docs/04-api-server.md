@@ -123,7 +123,12 @@ public sealed class RoomManager
 {
     // Aggiunge il partecipante, creando la stanza (nome "RM-{id}") se non esiste.
     // Assegna il nickname effettivo, disambiguandolo se necessario.
-    JoinResult Join(string roomId, string requestedNickname, Participant p);
+    JoinResult Join(
+        string roomId,
+        string requestedNickname,
+        string publicKey,
+        Participant p,
+        string? joinMessage = null);
 
     // Rimuove il partecipante e distrugge la stanza se rimane vuota.
     void Leave(Participant p);
@@ -190,10 +195,19 @@ mai racchiudere una `SendAsync`.
 
 ```csharp
 // Esito di un join: entrato subito (stanza nuova), messo in attesa, o errore.
-JoinResult Join(string roomId, string requestedNickname, Participant p);
+JoinResult Join(
+    string roomId,
+    string requestedNickname,
+    string publicKey,
+    Participant p,
+    string? joinMessage = null);
 
 // Un partecipante risponde a una richiesta pendente.
-ApprovalResult Approve(Participant approver, Guid requestId);
+ApprovalResult Approve(
+    Participant approver,
+    Guid requestId,
+    WrappedKey wrappedKey,
+    int keyEpoch);
 ApprovalResult Reject(Participant approver, Guid requestId);
 
 // Il richiedente ritira la propria richiesta.
@@ -276,13 +290,14 @@ Regole:
 public sealed class Participant
 {
     public Guid ConnectionId { get; }        // interno, mai inviato ai client
-    public string Nickname { get; set; }     // quello EFFETTIVO, assegnato al join
-    public Room? CurrentRoom { get; set; }
-    public DateTimeOffset LastSeen { get; set; }
+    public string? Nickname { get; }          // quello EFFETTIVO, assegnato al join
+    public string? PublicKey { get; }         // presente solo dentro o in attesa
+    public Room? CurrentRoom { get; }
+    public DateTimeOffset LastSeen { get; }
 
     private readonly Channel<string> _sendQueue;
 
-    public void Enqueue(string json);        // non bloccante, da qualsiasi thread
+    public bool TryEnqueue(string json);      // false => coda piena, disconnessione
     public Task RunWriterAsync(CancellationToken ct);  // unico task che scrive sul socket
 }
 ```

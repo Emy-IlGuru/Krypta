@@ -53,7 +53,8 @@ Nessuna passphrase in più da concordare: si scambia solo l'ID.
 restano visibili al gestore del server — è il server a generarli. Per questo TLS non è
 opzionale. Dettagli in [03 §7bis](docs/03-protocollo.md).
 
-> ⚠️ **Esistono soltanto le fondamenta e il contratto condiviso.** Finché la fase 1B non
+> ⚠️ **Il nucleo server esiste, ma non esiste ancora una chat utilizzabile.** Mancano
+> ancora eventi, comandi, client completo, TLS ed E2EE verificata. Finché la fase 1B non
 > è completa, Krypta non protegge da nessuno dei due avversari. Non usarlo per niente di
 > reale.
 
@@ -92,8 +93,7 @@ Per ora tutto gira **in locale** (`127.0.0.1`).
 | [05 — Client desktop](docs/05-client-desktop.md) | Le 4 schermate, layout, colori dei nickname |
 | [06 — Configurazione](docs/06-configurazione.md) | Il file `krypta.config.xml` |
 | [07 — Sicurezza e privacy](docs/07-sicurezza-e-privacy.md) | Modello di minaccia, cosa proteggiamo e cosa no |
-| [08 — Roadmap](docs/08-roadmap.md) | Fasi e milestone |
-| [09 — Decisioni e domande aperte](docs/09-domande-aperte.md) | **Da leggere:** cosa è già deciso e cosa resta da decidere |
+| [Mockup dell'interfaccia](docs/assets/mockup-interfaccia.html) | Le cinque schermate nei due temi, con le palette dei nickname. Da aprire nel browser |
 | [adr/](docs/adr/) | Decisioni tecniche registrate |
 
 ## Convenzioni

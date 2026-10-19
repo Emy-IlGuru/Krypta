@@ -581,8 +581,10 @@ public static Color ForNickname(string nickname)
         hash *= 16777619u;
     }
 
-    // 3. Indice nella palette.
-    return Palette[(int)(hash % (uint)Palette.Length)];
+    // 3. Indice nella palette del tema corrente (20 voci per entrambi i temi).
+    //    Le due palette hanno la stessa lunghezza: lo stesso nickname prende
+    //    lo stesso indice in chiaro e in scuro, e cambia solo la tinta.
+    return Palette(theme)[(int)(hash % (uint)Palette(theme).Length)];
 }
 ```
 
@@ -590,26 +592,66 @@ public static Color ForNickname(string nickname)
 `emy2` sono nomi diversi e ricevono quindi colori diversi: la disambiguazione numerica
 si vede anche dal colore, non solo dalla cifra finale.
 
-**Palette** — 16 colori distinguibili tra loro e leggibili su sfondo scuro
-(contrasto ≥ 4.5:1, WCAG AA):
+**Due palette da 20 colori**, una per tema. Stessi indici, tinte diverse: un colore
+leggibile su fondo scuro non lo è su fondo chiaro, quindi **il colore dipende dal nickname
+e dal tema**. Sono rese entrambe nel mockup: [`docs/assets/mockup-interfaccia.html`](assets/mockup-interfaccia.html).
 
-| # | Hex | | # | Hex | | # | Hex | | # | Hex |
+I contrasti sono misurati sul fondo dell'area messaggi del rispettivo tema — `#0E1116` per
+lo scuro, `#FFFFFF` per il chiaro — e sono tutti sopra il 4.5:1 di WCAG AA (RNF-10).
+
+| # | Scuro | Contr. | Chiaro | Contr. | | # | Scuro | Contr. | Chiaro | Contr. |
 |---|---|---|---|---|---|---|---|---|---|---|
-| 1 | `#E06C75` | | 5 | `#61AFEF` | | 9 | `#E5C07B` | | 13 | `#56B6C2` |
-| 2 | `#98C379` | | 6 | `#C678DD` | | 10 | `#D19A66` | | 14 | `#7FD1B9` |
-| 3 | `#E6A4B4` | | 7 | `#89DDFF` | | 11 | `#B5CEA8` | | 15 | `#F78C6C` |
-| 4 | `#82AAFF` | | 8 | `#C3E88D` | | 12 | `#FFCB6B` | | 16 | `#DDBBAA` |
+| 1 | `#E06C75` | 5.92 | `#DA1B29` | 5.04 | | 11 | `#B5CEA8` | 11.13 | `#1D4A1C` | 10.25 |
+| 2 | `#98C379` | 9.38 | `#3E5F17` | 7.36 | | 12 | `#FFCB6B` | 12.61 | `#8C6D06` | 4.88 |
+| 3 | `#E6A4B4` | 9.31 | `#C9264D` | 5.43 | | 13 | `#56B6C2` | 7.98 | `#19535A` | 8.66 |
+| 4 | `#82AAFF` | 8.23 | `#0A53EE` | 6.03 | | 14 | `#7FD1B9` | 10.56 | `#1F7159` | 5.89 |
+| 5 | `#61AFEF` | 8.00 | `#065290` | 8.02 | | 15 | `#F78C6C` | 8.04 | `#D03609` | 4.98 |
+| 6 | `#C678DD` | 6.42 | `#AD23D6` | 5.27 | | 16 | `#DDBBAA` | 10.59 | `#7F4D18` | 7.05 |
+| 7 | `#89DDFF` | 12.47 | `#054E6C` | 9.08 | | 17 | `#B0A4DA` | 8.26 | `#6240DA` | 6.43 |
+| 8 | `#C3E88D` | 13.73 | `#32680C` | 6.73 | | 18 | `#60DC75` | 10.80 | `#098144` | 4.96 |
+| 9 | `#E5C07B` | 10.95 | `#614A0A` | 8.43 | | 19 | `#CB80B8` | 6.59 | `#BA2594` | 5.56 |
+| 10 | `#D19A66` | 7.68 | `#A74C24` | 5.67 | | 20 | `#DADC60` | 12.96 | `#4C4D0A` | 8.85 |
+
+Minimo: **5.92** sullo scuro, **4.88** sul chiaro. La coppia percettivamente più vicina è a
+**ΔE 15.4** sullo scuro e **11.3** sul chiaro (in entrambi i casi i due verdi 2 e 8).
+
+**Da dove vengono i colori 17–20.** Le prime sedici tinte sono quelle originarie. Le quattro
+aggiunte non sono scelte a occhio: sono state messe nei **quattro intervalli di tinta più
+larghi** che la palette lasciava scoperti — indaco (253°), verde (130°), magenta (315°) e
+chartreuse (61°) — mantenendo saturazione e luminosità nella gamma delle altre, così da non
+introdurre colori che stonano. Aggiungerle non ha stretto la palette: la coppia più vicina
+resta la stessa di prima, con la stessa distanza.
+
+**La palette chiara non è la scura schiarita.** Ogni tinta conserva l'angolo di colore ma
+viene saturata e scurita fino a superare AA sul bianco. I contrasti sono deliberatamente
+**scaglionati** invece che uniformi: portarli tutti allo stesso valore appiattirebbe le
+differenze di luminosità, e i tre verdi diventerebbero indistinguibili fra loro.
 
 I colori di `STANZA` e `KRYPTA` **non** vengono dalla palette: sono due tinte fisse
 riservate — grigio per i messaggi di sistema, un accento distinto per quelli locali.
 Se passassero dalla stessa funzione degli utenti, potrebbero capitare dello stesso colore
 di un partecipante e diventare indistinguibili da un messaggio vero.
 
-Con 16 colori e 20 partecipanti le collisioni sono garantite. È accettabile: il colore
-aiuta a scorrere la conversazione, il nickname resta sempre scritto accanto.
+**Venti colori per venti posti non tolgono le collisioni**, ed è bene non aspettarselo:
+l'indice esce da un hash, non da una distribuzione ordinata, quindi due nickname possono
+finire sullo stesso colore anche con la stanza mezza vuota. Il guadagno reale, con 20
+partecipanti, è questo:
 
-Un futuro tema chiaro richiede una **seconda palette** con gli stessi 16 indici ma
-tonalità più scure: il colore dipende dal nickname *e* dal tema.
+| Palette | Colori distinti attesi | Probabilità di zero collisioni |
+|---|---|---|
+| 16 colori | 11.6 | ~0 |
+| **20 colori** | **12.8** | 0,0000023% |
+
+Un colore distinto in più, in media. Vale la pena averlo — costa quattro voci in una
+tabella — ma **non cambia la natura della cosa**: le collisioni restano la norma, e la
+difesa vera è che il nickname è sempre scritto accanto al messaggio. Il colore aiuta a
+scorrere la conversazione, non a identificare chi parla.
+
+> **Attenzione al cambio di modulo.** Passando da 16 a 20 voci, `hash % Palette.Length`
+> cambia per **tutti** i nickname, non solo per quelli che finirebbero nelle tinte nuove:
+> `emy` non avrà più il colore che aveva prima. Non è un problema — niente è persistente e
+> il colore non è un'identità — ma va saputo, perché durante lo sviluppo dà l'impressione
+> che qualcosa si sia rotto.
 
 ---
 

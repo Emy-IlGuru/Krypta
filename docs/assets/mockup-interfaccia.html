@@ -1,0 +1,415 @@
+<title>Schermate Krypta</title>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap">
+<style>
+:root{
+  --sans:"Archivo","Segoe UI",system-ui,sans-serif;
+  --mono:"JetBrains Mono","Cascadia Mono",Consolas,monospace;
+  --bg:#EEF1F4; --surface:#FFFFFF; --raised:#F7F9FB; --sunken:#E7EBEF;
+  --line:#D8DFE6; --line-soft:#E6EBF0;
+  --ink:#161B22; --ink-2:#3C4653; --muted:#5E6875; --faint:#8A94A0;
+  --accent:#4A3FBF; --accent-soft:#EDEBFB;
+  --ok:#1B7A50; --ok-soft:#E4F3EC;
+  --warn:#8A5B00; --warn-soft:#FBF0DC;
+  --danger:#B3261E; --stanza:#6B7684;
+  --nk1:#DA1B29;--nk2:#3E5F17;--nk3:#C9264D;--nk4:#0A53EE;--nk5:#065290;--nk6:#AD23D6;
+  --nk7:#054E6C;--nk8:#32680C;--nk9:#614A0A;--nk10:#A74C24;--nk11:#1D4A1C;--nk12:#8C6D06;
+  --nk13:#19535A;--nk14:#1F7159;--nk15:#D03609;--nk16:#7F4D18;
+  --nk17:#6240DA;--nk18:#098144;--nk19:#BA2594;--nk20:#4C4D0A;
+  --shadow:0 1px 2px rgba(22,27,34,.06),0 8px 24px -12px rgba(22,27,34,.18);
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#0A0D11; --surface:#0E1116; --raised:#161B22; --sunken:#080A0D;
+  --line:#242C36; --line-soft:#1A212A;
+  --ink:#D7DDE5; --ink-2:#AEB8C4; --muted:#79838F; --faint:#5C6673;
+  --accent:#A79BFF; --accent-soft:#1B1930;
+  --ok:#3FB27F; --ok-soft:#0F2119;
+  --warn:#D9A441; --warn-soft:#241C0C;
+  --danger:#E05252; --stanza:#6E7883;
+  --nk1:#E06C75;--nk2:#98C379;--nk3:#E6A4B4;--nk4:#82AAFF;--nk5:#61AFEF;--nk6:#C678DD;
+  --nk7:#89DDFF;--nk8:#C3E88D;--nk9:#E5C07B;--nk10:#D19A66;--nk11:#B5CEA8;--nk12:#FFCB6B;
+  --nk13:#56B6C2;--nk14:#7FD1B9;--nk15:#F78C6C;--nk16:#DDBBAA;
+  --nk17:#B0A4DA;--nk18:#60DC75;--nk19:#CB80B8;--nk20:#DADC60;
+  --shadow:0 1px 2px rgba(0,0,0,.4),0 12px 32px -16px rgba(0,0,0,.7);
+}}
+:root[data-theme="dark"]{
+  --bg:#0A0D11; --surface:#0E1116; --raised:#161B22; --sunken:#080A0D;
+  --line:#242C36; --line-soft:#1A212A;
+  --ink:#D7DDE5; --ink-2:#AEB8C4; --muted:#79838F; --faint:#5C6673;
+  --accent:#A79BFF; --accent-soft:#1B1930;
+  --ok:#3FB27F; --ok-soft:#0F2119;
+  --warn:#D9A441; --warn-soft:#241C0C;
+  --danger:#E05252; --stanza:#6E7883;
+  --nk1:#E06C75;--nk2:#98C379;--nk3:#E6A4B4;--nk4:#82AAFF;--nk5:#61AFEF;--nk6:#C678DD;
+  --nk7:#89DDFF;--nk8:#C3E88D;--nk9:#E5C07B;--nk10:#D19A66;--nk11:#B5CEA8;--nk12:#FFCB6B;
+  --nk13:#56B6C2;--nk14:#7FD1B9;--nk15:#F78C6C;--nk16:#DDBBAA;
+  --nk17:#B0A4DA;--nk18:#60DC75;--nk19:#CB80B8;--nk20:#DADC60;
+  --shadow:0 1px 2px rgba(0,0,0,.4),0 12px 32px -16px rgba(0,0,0,.7);
+}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:15px;
+  line-height:1.55;-webkit-font-smoothing:antialiased}
+.wrap{max-width:1120px;margin:0 auto;padding:48px 28px 96px}
+h1,h2,h3{text-wrap:balance;margin:0}
+.eyebrow{font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;
+  color:var(--faint);font-weight:500;margin:0}
+.top{display:flex;justify-content:space-between;align-items:flex-end;gap:32px;
+  flex-wrap:wrap;padding-bottom:24px;border-bottom:1px solid var(--line)}
+.top h1{font-size:34px;font-weight:700;letter-spacing:-.02em;line-height:1.1;margin:6px 0 0}
+.top .lede{margin:10px 0 0;color:var(--muted);max-width:58ch;font-size:14.5px}
+.themer{display:flex;gap:2px;padding:3px;background:var(--sunken);
+  border:1px solid var(--line);border-radius:9px}
+.themer button{font:500 12.5px/1 var(--sans);color:var(--muted);background:none;border:0;
+  padding:8px 13px;border-radius:6px;cursor:pointer}
+.themer button[aria-pressed="true"]{background:var(--surface);color:var(--ink);
+  box-shadow:0 1px 2px rgba(0,0,0,.14)}
+.themer button:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
+.board{margin-top:54px}
+.cap{display:flex;align-items:baseline;gap:12px;margin-bottom:14px;flex-wrap:wrap}
+.cap h2{font-size:17px;font-weight:600;letter-spacing:-.01em}
+.cap .ref{font-family:var(--mono);font-size:11.5px;color:var(--faint)}
+.cap p{margin:0;flex-basis:100%;color:var(--muted);font-size:13.5px;max-width:66ch}
+.app{background:var(--surface);border:1px solid var(--line);border-radius:11px;
+  box-shadow:var(--shadow);overflow:hidden}
+.chrome{display:flex;align-items:center;gap:7px;padding:11px 14px;
+  background:var(--raised);border-bottom:1px solid var(--line-soft)}
+.dot{width:10px;height:10px;border-radius:50%;background:var(--line);flex:none}
+.chrome span{margin-left:6px;font-family:var(--mono);font-size:11px;color:var(--faint)}
+.pane{padding:38px 40px;min-height:340px;display:flex;flex-direction:column}
+.center{align-items:center;justify-content:center;text-align:center}
+.field{width:100%;max-width:344px;text-align:left}
+.field+.field{margin-top:18px}
+label{display:block;font-size:12.5px;font-weight:500;color:var(--ink-2);margin-bottom:6px}
+.input{width:100%;background:var(--bg);border:1px solid var(--line);border-radius:7px;
+  padding:10px 12px;font:400 14px/1.4 var(--sans);color:var(--ink)}
+.input.mono{font-family:var(--mono)}
+.hint{margin:6px 0 0;font-size:12px;color:var(--muted);line-height:1.55}
+.hint.warn{color:var(--warn)}
+.btn{font:600 13.5px/1 var(--sans);padding:11px 20px;border-radius:7px;
+  border:1px solid transparent;cursor:pointer;background:var(--ink);color:var(--surface)}
+.btn.ghost{background:transparent;border-color:var(--line);color:var(--ink-2);font-weight:500}
+.btn.small{padding:7px 13px;font-size:12.5px}
+.btn:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.row{display:flex;gap:10px;align-items:center}
+.spread{justify-content:space-between}
+.mt{margin-top:26px}
+.brand{font-family:var(--mono);font-weight:700;font-size:21px;letter-spacing:.42em;
+  color:var(--ink);margin-bottom:6px}
+.tag{font-size:12.5px;color:var(--muted);margin:0 0 30px}
+.status{margin-top:22px;font-size:12.5px;display:flex;align-items:center;gap:7px;color:var(--ok)}
+.led{width:7px;height:7px;border-radius:50%;background:currentColor;flex:none}
+.check{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--ink-2);margin-top:16px}
+.box{width:14px;height:14px;border:1px solid var(--line);border-radius:3px;
+  background:var(--bg);flex:none}
+.roomid{font-family:var(--mono);font-size:29px;font-weight:700;letter-spacing:.34em;
+  text-align:center;padding:15px 8px 15px 22px;background:var(--bg);
+  border:1px solid var(--line);border-radius:9px;color:var(--ink)}
+.counter{font-family:var(--mono);font-size:11px;color:var(--faint);float:right;margin-top:6px;
+  font-variant-numeric:tabular-nums}
+.pulse{display:flex;gap:7px;justify-content:center;margin:22px 0 10px}
+.pulse i{width:7px;height:7px;border-radius:50%;background:var(--muted);opacity:.35;
+  animation:bl 1.4s ease-in-out infinite}
+.pulse i:nth-child(2){animation-delay:.16s}.pulse i:nth-child(3){animation-delay:.32s}
+.pulse i:nth-child(4){animation-delay:.48s}.pulse i:nth-child(5){animation-delay:.64s}
+@keyframes bl{0%,100%{opacity:.22}50%{opacity:.9}}
+@media (prefers-reduced-motion:reduce){.pulse i{animation:none;opacity:.5}}
+.vcode{font-family:var(--mono);font-size:18px;font-weight:500;letter-spacing:.1em;
+  color:var(--ink);margin:6px 0 0;user-select:all}
+.vbox{margin-top:24px;padding:15px 20px;background:var(--accent-soft);
+  border:1px solid var(--line-soft);border-radius:9px;max-width:370px}
+.vbox .eyebrow{color:var(--accent)}
+.bar{display:flex;align-items:center;gap:13px;padding:12px 16px;
+  border-bottom:1px solid var(--line);background:var(--raised);flex-wrap:wrap}
+.rname{font-weight:600;font-size:14.5px}
+.rid{font-family:var(--mono);font-size:12.5px;color:var(--muted);cursor:pointer}
+.lock{display:inline-flex;align-items:center;gap:5px;font-size:11.5px;font-weight:500;
+  color:var(--ok);background:var(--ok-soft);padding:3px 9px;border-radius:20px}
+.pill{font:500 12px/1 var(--sans);color:var(--warn);background:var(--warn-soft);
+  border:0;padding:6px 11px;border-radius:20px;cursor:pointer}
+.pcount{font-family:var(--mono);font-size:12px;color:var(--faint);font-variant-numeric:tabular-nums}
+.grow{flex:1}
+.panel{background:var(--bg);border-bottom:1px solid var(--line);padding:15px 18px}
+.ptitle{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
+.ptitle .eyebrow{color:var(--muted)}
+.req{display:grid;grid-template-columns:1fr auto;gap:3px 16px;align-items:center;
+  padding:11px 0;border-top:1px solid var(--line-soft)}
+.req .who{font-weight:600;font-size:13.5px}
+.req .who em{font-style:normal;font-family:var(--mono);font-size:11.5px;color:var(--faint);
+  font-weight:400;margin-left:8px}
+.req .msg{font-size:13px;color:var(--ink-2);grid-column:1;overflow:hidden;
+  text-overflow:ellipsis;white-space:nowrap}
+.req .vc{font-family:var(--mono);font-size:11.5px;color:var(--muted);grid-column:1}
+.req .acts{grid-row:1/4;grid-column:2;display:flex;gap:7px;align-items:center}
+.pnote{margin:12px 0 0;font-size:12px;color:var(--muted);line-height:1.6}
+.msgs{padding:20px 22px;display:flex;flex-direction:column;gap:17px;
+  background:var(--surface);min-height:236px}
+.m .from{font-family:var(--mono);font-size:12px;font-weight:500}
+.m .from b{font-weight:700}
+.m .dash{color:var(--faint);font-weight:400}
+.m .body{margin:2px 0 0;font-size:14.5px;color:var(--ink);max-width:68ch}
+.m.sys .body{color:var(--muted);font-style:italic;font-size:14px}
+.m.sys .from b{color:var(--stanza)}
+.m.loc .from b{color:var(--accent)}
+.m.loc .body{color:var(--ink-2);font-size:14px}
+.m.loc .body code{font-family:var(--mono);font-size:12.5px;background:var(--bg);
+  padding:1px 5px;border-radius:4px}
+.compose{display:flex;gap:10px;padding:14px 16px;border-top:1px solid var(--line);
+  background:var(--raised);align-items:center}
+.compose .input{background:var(--surface)}
+.pal{display:grid;grid-template-columns:repeat(auto-fill,minmax(122px,1fr));gap:10px;margin-top:18px}
+.sw{background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:11px 12px}
+.sw .n{font-family:var(--mono);font-size:18px;font-weight:700;line-height:1.25}
+.sw .h{font-family:var(--mono);font-size:10.5px;color:var(--faint);margin-top:4px;
+  display:flex;justify-content:space-between;gap:6px;font-variant-numeric:tabular-nums}
+.notes{margin-top:22px;display:grid;grid-template-columns:repeat(auto-fit,minmax(266px,1fr));gap:26px}
+.note h3{font-size:14px;font-weight:600;margin-bottom:6px}
+.note p{margin:0;color:var(--muted);font-size:13.5px;line-height:1.65}
+.note code{font-family:var(--mono);font-size:12.5px;color:var(--ink-2)}
+.sechead{margin-top:64px;padding-top:26px;border-top:1px solid var(--line)}
+.sechead h2{font-size:20px;font-weight:600;letter-spacing:-.01em}
+.sechead p{margin:8px 0 0;color:var(--muted);font-size:13.5px;max-width:72ch}
+@media (max-width:640px){.wrap{padding:32px 16px 64px}.pane{padding:26px 20px}
+  .top h1{font-size:26px}.roomid{font-size:22px;letter-spacing:.24em}}
+</style>
+
+<div class="wrap">
+<div class="top">
+  <div>
+    <p class="eyebrow">Krypta &middot; client desktop</p>
+    <h1>Cinque schermate, due temi</h1>
+    <p class="lede">L&rsquo;interfaccia Avalonia descritta in <strong>05 &mdash; Client desktop</strong>.
+      Struttura monospaziata, contenuto in sans: ID stanza e codici di verifica si dettano
+      a voce, quindi <code>0</code> e <code>O</code> devono restare distinguibili.</p>
+  </div>
+  <div class="themer" role="group" aria-label="Tema">
+    <button type="button" data-set="light" aria-pressed="false">Chiaro</button>
+    <button type="button" data-set="dark" aria-pressed="false">Scuro</button>
+    <button type="button" data-set="system" aria-pressed="true">Sistema</button>
+  </div>
+</div>
+
+<div class="board">
+  <div class="cap"><h2>Connessione</h2><span class="ref">[1]</span>
+    <p>Nessun server predefinito da cui si dipende: host e porta si scelgono qui, e il
+       default resta <code>127.0.0.1</code>.</p></div>
+  <div class="app"><div class="chrome"><i class="dot"></i><i class="dot"></i><i class="dot"></i><span>Krypta</span></div>
+    <div class="pane center">
+      <p class="brand">KRYPTA</p>
+      <p class="tag">Entri, parli, esci. Non resta niente.</p>
+      <div class="field"><label for="h1f">Indirizzo server</label>
+        <div class="input mono" id="h1f">127.0.0.1</div></div>
+      <div class="field"><label for="p1f">Porta</label>
+        <div class="input mono" id="p1f">5000</div></div>
+      <div class="field"><div class="check"><i class="box"></i>Ricorda queste impostazioni</div></div>
+      <div class="field"><div class="row spread mt">
+        <p class="status"><i class="led"></i>Connesso &middot; certificato verificato</p>
+        <button class="btn">Connetti</button></div></div>
+    </div></div>
+</div>
+
+<div class="board">
+  <div class="cap"><h2>Account</h2><span class="ref">[2]</span>
+    <p>Solo un nickname, valido per questa sessione. L&rsquo;anteprima mostra gi&agrave; il colore
+       che avr&agrave; in chat, calcolato dal nome stesso.</p></div>
+  <div class="app"><div class="chrome"><i class="dot"></i><i class="dot"></i><i class="dot"></i><span>127.0.0.1:5000</span></div>
+    <div class="pane center">
+      <p class="eyebrow">Come vuoi farti chiamare?</p>
+      <div class="field" style="margin-top:18px"><label for="n2f">Nickname</label>
+        <div class="input mono" id="n2f" style="color:var(--nk5);font-weight:500">emy</div>
+        <p class="hint">Da 3 a 25 caratteri: lettere, cifre, <code>_</code> <code>-</code> <code>.</code>
+          e spazio. Niente accenti n&eacute; emoji.</p>
+        <p class="hint">Se il nome &egrave; gi&agrave; in uso nella stanza, ne riceverai uno
+          numerato &mdash; per esempio <strong>emy2</strong>, con un colore diverso.</p></div>
+      <div class="field"><div class="row spread mt">
+        <p class="hint" style="margin:0">Nessuna password, nessun account.</p>
+        <button class="btn">Avanti</button></div></div>
+    </div></div>
+</div>
+<div class="board">
+  <div class="cap"><h2>Selezione stanza</h2><span class="ref">[3]</span>
+    <p>Il campo converte in maiuscolo mentre si digita e scarta i caratteri non validi.
+       Il messaggio &egrave; precompilato e modificabile &mdash; ed &egrave; l&rsquo;unico testo
+       scritto da te che non viene cifrato.</p></div>
+  <div class="app"><div class="chrome"><i class="dot"></i><i class="dot"></i><i class="dot"></i><span>127.0.0.1:5000 &middot; emy</span></div>
+    <div class="pane center">
+      <div class="field"><label for="r3f">ID della stanza</label>
+        <div class="roomid" id="r3f">K7X2M9</div>
+        <p class="hint">Sei caratteri: lettere o numeri. Se la stanza non esiste, la crei ed
+          entri subito; se esiste, dovrai aspettare che qualcuno gi&agrave; dentro ti accetti.</p></div>
+      <div class="field"><label for="j3f">Messaggio per chi ti dovr&agrave; accettare</label>
+        <div class="input" id="j3f">Hey, mi vorrei unire alla stanza</div>
+        <span class="counter">31/200</span>
+        <p class="hint warn">Non &egrave; cifrato: lo legge anche chi gestisce il server.</p></div>
+      <div class="field"><div class="row spread mt">
+        <p class="hint" style="margin:0">Un ID prevedibile annulla il vantaggio.</p>
+        <button class="btn">Entra</button></div></div>
+    </div></div>
+</div>
+
+<div class="board">
+  <div class="cap"><h2>In attesa di approvazione</h2><span class="ref">[3b]</span>
+    <p>Di proposito non mostra nulla della stanza, nemmeno il nome o quante persone ci sono:
+       bussare a un ID non deve dire se quella stanza esiste ed &egrave; attiva.</p></div>
+  <div class="app"><div class="chrome"><i class="dot"></i><i class="dot"></i><i class="dot"></i><span>127.0.0.1:5000 &middot; luca</span></div>
+    <div class="pane center">
+      <p class="eyebrow">Stanza</p>
+      <p class="roomid" style="border:0;background:none;padding:6px 0 0 10px;font-size:26px">#K7X2M9</p>
+      <div class="pulse"><i></i><i></i><i></i><i></i><i></i></div>
+      <p class="hint" style="max-width:34ch">Qualcuno gi&agrave; nella stanza deve accettare
+        la tua richiesta.</p>
+      <p class="pcount" style="margin-top:14px;font-size:15px;color:var(--ink-2)">Scade fra 1:47</p>
+      <div class="vbox">
+        <p class="eyebrow">Il tuo codice di verifica</p>
+        <p class="vcode">2269 9870 9190 2425</p>
+        <p class="hint" style="margin-top:8px">Chi ti accetta vede lo stesso codice.
+          Confrontarlo a voce esclude che qualcuno si sia messo in mezzo.</p>
+      </div>
+      <button class="btn ghost mt">Annulla</button>
+    </div></div>
+</div>
+<div class="board">
+  <div class="cap"><h2>Chat</h2><span class="ref">[4]</span>
+    <p>L&rsquo;intestazione si ripete a ogni messaggio, anche consecutivo: nessun raggruppamento.
+       Lo stacco &egrave; un margine, non una riga vuota, cos&igrave; copiare la conversazione non
+       porta via righe vuote. Il pannello d&rsquo;attesa &egrave; qui aperto per mostrarlo: nell&rsquo;app
+       non si apre mai da solo.</p></div>
+  <div class="app">
+    <div class="bar">
+      <span class="rname">Coordinamento</span>
+      <span class="rid" title="Clicca per copiare">#K7X2M9</span>
+      <span class="lock">&#9679; cifrata</span>
+      <span class="grow"></span>
+      <button class="pill">Attesa (2)</button>
+      <span class="pcount">3/20</span>
+      <button class="btn ghost small">Lascia stanza</button>
+    </div>
+    <div class="panel">
+      <div class="ptitle"><p class="eyebrow">In attesa di entrare</p>
+        <button class="btn ghost small" aria-label="Chiudi pannello">&times;</button></div>
+      <div class="req">
+        <div class="who">sara <em>da 0:12</em></div>
+        <div class="msg">&ldquo;Sono Sara, quella del preventivo&rdquo;</div>
+        <div class="vc">codice 4821 9037 5164 2288</div>
+        <div class="acts"><button class="btn small">Accetta</button>
+          <button class="btn ghost small">Rifiuta</button></div>
+      </div>
+      <div class="req">
+        <div class="who">marco <em>da 0:03</em></div>
+        <div class="msg">&ldquo;Hey, mi vorrei unire alla stanza&rdquo;</div>
+        <div class="vc">codice 7734 1290 6605 4417</div>
+        <div class="acts"><button class="btn small">Accetta</button>
+          <button class="btn ghost small">Rifiuta</button></div>
+      </div>
+      <p class="pnote">Il messaggio lo scrive chi bussa: non prova niente. Accettando consegni
+        a questa persona la chiave della stanza. Chiunque pu&ograve; decidere, e verr&agrave;
+        mostrato a tutti chi &egrave; stato.</p>
+    </div>
+    <div class="msgs">
+      <div class="m sys"><p class="from"><span class="dash">--</span> <b>STANZA</b> <span class="dash">---</span></p>
+        <p class="body">luca si &egrave; unito alla stanza, accettato da emy</p></div>
+      <div class="m"><p class="from"><span class="dash">--</span> <b style="color:var(--nk5)">emy</b> <span class="dash">---</span></p>
+        <p class="body">ci vediamo alle 18, porto io i documenti stampati</p></div>
+      <div class="m"><p class="from"><span class="dash">--</span> <b style="color:var(--nk2)">luca</b> <span class="dash">---</span></p>
+        <p class="body">perfetto</p></div>
+      <div class="m"><p class="from"><span class="dash">--</span> <b style="color:var(--nk2)">luca</b> <span class="dash">---</span></p>
+        <p class="body">ricordati la chiavetta</p></div>
+      <div class="m sys"><p class="from"><span class="dash">--</span> <b>STANZA</b> <span class="dash">---</span></p>
+        <p class="body">Partecipanti (3/20): emy, luca, emy2</p></div>
+      <div class="m loc"><p class="from"><span class="dash">--</span> <b>KRYPTA</b> <span class="dash">---</span></p>
+        <p class="body">Comando sconosciuto: <code>/pippo</code>. Scrivi <code>/Help</code>
+          per l&rsquo;elenco. <em>Questa riga la vedi solo tu.</em></p></div>
+    </div>
+    <div class="compose">
+      <div class="input grow" style="color:var(--faint)">Scrivi un messaggio&hellip;</div>
+      <button class="btn">Invia</button>
+    </div>
+  </div>
+</div>
+<div class="sechead">
+  <h2>Le due palette dei nickname</h2>
+  <p>Il colore si deriva dal nickname con FNV-1a, senza coordinamento col server: stesso nome,
+     stesso colore su tutti i client. <strong>Venti tinte</strong>, una per posto nella stanza:
+     le prime sedici sono quelle gi&agrave; fissate in 05 &sect;6, le ultime quattro sono nuove e
+     stanno nei quattro buchi di tinta pi&ugrave; larghi che la palette aveva &mdash; indaco,
+     verde, magenta, chartreuse. La versione chiara mantiene la tinta e abbassa la
+     luminosit&agrave;. Sotto ogni campione c&rsquo;&egrave; il contrasto misurato sul fondo
+     dell&rsquo;area messaggi del proprio tema: il minimo &egrave; <strong>4,88</strong>, sopra
+     il 4,5 richiesto da WCAG AA.</p>
+</div>
+<div class="pal" id="pal"></div>
+
+<div class="notes">
+  <div class="note"><h3>Perch&eacute; due palette e non una schiarita</h3>
+    <p>Gli stessi 20 indici, ma ritinti: un colore leggibile su fondo scuro non lo &egrave; su
+      fondo chiaro. Il colore dipende quindi dal nickname <em>e</em> dal tema, e i due insiemi
+      vanno mantenuti allineati per posizione.</p></div>
+  <div class="note"><h3>STANZA e KRYPTA restano fuori</h3>
+    <p>Due tinte fisse, non pescate dalla palette: <span style="color:var(--stanza);font-weight:600">STANZA</span>
+      grigio per i messaggi del server, <span style="color:var(--accent);font-weight:600">KRYPTA</span>
+      per quelli che vedi solo tu. Se passassero dalla stessa funzione dei nickname,
+      potrebbero capitare del colore di un partecipante.</p></div>
+  <div class="note"><h3>Venti colori non tolgono le collisioni</h3>
+    <p>Un colore per posto sembra bastare, e non basta: l&rsquo;indice esce da un hash, non da
+      una distribuzione. Con la stanza piena i colori distinti attesi passano da
+      <strong>11,6</strong> a <strong>12,8</strong> &mdash; un colore in pi&ugrave; e poco altro.
+      Va bene cos&igrave;: il colore aiuta a scorrere la conversazione, il nome resta sempre
+      scritto accanto.</p></div>
+</div>
+
+<div class="sechead">
+  <h2>Scelte di stile</h2>
+  <p>Tre decisioni che vale la pena fissare prima di scrivere gli <code>.axaml</code>.</p>
+</div>
+<div class="notes">
+  <div class="note"><h3>Monospazio dove si detta, sans dove si legge</h3>
+    <p>ID stanza, codici di verifica, contatori e le intestazioni <code>-- nickname ---</code>
+      sono monospaziati; il testo dei messaggi &egrave; in sans. Non &egrave; estetica: un ID
+      trascritto male non d&agrave; errore, porta in una stanza nuova e vuota.</p></div>
+  <div class="note"><h3>Il colore ha un significato o non c&rsquo;&egrave;</h3>
+    <p>La cromia satura &egrave; riservata ai nickname. Tutto il resto &egrave; neutro, tranne
+      tre stati: <span style="color:var(--ok);font-weight:600">verde</span> cifrato,
+      <span style="color:var(--warn);font-weight:600">ambra</span> avviso o attesa,
+      <span style="color:var(--danger);font-weight:600">rosso</span> distruttivo.</p></div>
+  <div class="note"><h3>L&rsquo;avviso in chiaro non &egrave; un badge</h3>
+    <p>Su <code>ws://</code> l&rsquo;indicatore di cifratura diventa un avviso permanente e
+      visibile, non un&rsquo;icona da cercare. Finch&eacute; la fase 1B non &egrave; completa
+      &egrave; l&rsquo;unica cosa che impedisce di usare Krypta credendolo cifrato.</p></div>
+</div>
+</div>
+
+<script>
+(function(){
+  var root=document.documentElement, btns=[].slice.call(document.querySelectorAll('.themer button'));
+  function apply(v){
+    if(v==='system'){root.removeAttribute('data-theme');}else{root.setAttribute('data-theme',v);}
+    btns.forEach(function(b){b.setAttribute('aria-pressed', String(b.dataset.set===v));});
+    try{localStorage.setItem('krypta-theme',v);}catch(e){}
+  }
+  btns.forEach(function(b){b.addEventListener('click',function(){apply(b.dataset.set);});});
+  var saved=null; try{saved=localStorage.getItem('krypta-theme');}catch(e){}
+  apply(saved==='light'||saved==='dark'?saved:'system');
+
+  var dark=['#E06C75','#98C379','#E6A4B4','#82AAFF','#61AFEF','#C678DD','#89DDFF','#C3E88D',
+            '#E5C07B','#D19A66','#B5CEA8','#FFCB6B','#56B6C2','#7FD1B9','#F78C6C','#DDBBAA','#B0A4DA','#60DC75','#CB80B8','#DADC60'],
+      light=['#DA1B29','#3E5F17','#C9264D','#0A53EE','#065290','#AD23D6','#054E6C','#32680C',
+             '#614A0A','#A74C24','#1D4A1C','#8C6D06','#19535A','#1F7159','#D03609','#7F4D18','#6240DA','#098144','#BA2594','#4C4D0A'],
+      rd=[5.92,9.38,9.31,8.23,8.00,6.42,12.47,13.73,10.95,7.68,11.13,12.61,7.98,10.56,8.04,10.59,8.26,10.80,6.59,12.96],
+      rl=[5.04,7.36,5.43,6.03,8.02,5.27,9.08,6.73,8.42,5.67,10.25,4.88,8.66,5.89,4.98,7.05,6.43,4.96,5.56,8.85],
+      html='';
+  for(var i=0;i<20;i++){
+    html+='<div class="sw"><div class="n" style="color:var(--nk'+(i+1)+')">'+(i+1)+'</div>'+
+          '<div class="h"><span class="lightonly">'+light[i]+'</span>'+
+          '<span class="darkonly">'+dark[i]+'</span>'+
+          '<span class="lightonly">'+rl[i].toFixed(2)+'</span>'+
+          '<span class="darkonly">'+rd[i].toFixed(2)+'</span></div></div>';
+  }
+  document.getElementById('pal').innerHTML=html;
+})();
+</script>
+<style>
+.darkonly{display:none}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .darkonly{display:inline}
+  :root:not([data-theme="light"]) .lightonly{display:none}}
+:root[data-theme="dark"] .darkonly{display:inline}
+:root[data-theme="dark"] .lightonly{display:none}
+</style>
