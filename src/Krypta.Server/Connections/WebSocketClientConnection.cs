@@ -2,8 +2,12 @@ using System.Net.WebSockets;
 
 namespace Krypta.Server.Connections;
 
-public sealed class WebSocketClientConnection(WebSocket socket) : IClientConnection
+public sealed class WebSocketClientConnection(
+    WebSocket socket,
+    string? remoteAddress = null) : IClientConnection
 {
+    public string? RemoteAddress { get; } = remoteAddress;
+
     public async ValueTask<ConnectionReceiveResult> ReceiveAsync(
         Memory<byte> buffer,
         CancellationToken cancellationToken)

@@ -23,6 +23,7 @@ rinviabile), `Could` (se avanza tempo), `Won't` (esplicitamente fuori dall'MVP).
 | RF-S-09 | A ogni ingresso o uscita il server invia a tutti il **nuovo numero** di partecipanti. | Must |
 | RF-S-10 | Il server **non espone** l'elenco delle stanze esistenti. | Must |
 | RF-S-11 | Il server rileva le disconnessioni non pulite tramite heartbeat e libera il posto nella stanza, annunciando l'uscita. | Must |
+| RF-S-11b | Finestra del partecipante fantasma: su disconnessione brusca (caduta TCP senza FIN/RST), il socket resta registrato sul server fino al timeout dell'heartbeat (max 60 s). Un rientro immediato con lo stesso nickname viene trattato come connessione separata (riceve numero automatico es. `emy2` e va in sala d'attesa); il server **non** ammette subentri di sessione (session takeover) per preservare la sicurezza crittografica. | Must |
 
 ### 1.1bis Sala d'attesa
 
@@ -146,6 +147,7 @@ rinviabile), `Could` (se avanza tempo), `Won't` (esplicitamente fuori dall'MVP).
 | ID | Requisito | Priorità |
 |---|---|---|
 | RF-C-07 | La terza schermata chiede l'**ID della stanza** (6 caratteri alfanumerici) e non mostra nessun elenco. | Must |
+| RF-C-07b | La schermata [3] include un pulsante **Genera ID** che compila il campo con un ID casuale conforme (`[A-Z0-9]{6}`) usando `RandomNumberGenerator`. Mitiga l'uso di ID deboli/prevedibili e il rischio di collisione o corsa all'ID (host hijacking). | Must |
 | RF-C-08 | Il campo ID **converte in maiuscolo mentre si digita** e scarta i caratteri non validi. È il client a garantire la forma `[A-Z0-9]{6}` richiesta dal server: senza la conversione, chi digita in minuscolo riceverebbe un errore incomprensibile. | Must |
 | RF-C-09 | Non esiste un campo per il nome della stanza: si assegna dopo, con `/NameRoom`. | Must |
 | RF-C-10 | Su `JOIN_RATE_LIMITED` il client mostra il blocco con conto alla rovescia da `retryAfterSeconds` e disabilita il pulsante finché non scade. | Must |
@@ -183,6 +185,7 @@ rinviabile), `Could` (se avanza tempo), `Won't` (esplicitamente fuori dall'MVP).
 | RF-C-18 | In basso: casella di testo e pulsante **Invia**. `Invio` invia, `Shift+Invio` va a capo. | Must |
 | RF-C-19 | Il messaggio inviato compare **solo quando torna dal server** (eco). La casella si svuota subito. | Must |
 | RF-C-20 | L'area messaggi scorre in fondo all'arrivo di un nuovo messaggio **solo se** l'utente è già in fondo. | Should |
+| RF-C-20b | All'arrivo di un `system` `user_left`, il client propone un'**azione rapida contestuale per `/GenerateKey`** (promemoria discreto/pulsante "Rigenera chiave"), ricordando che chi è uscito conserva la chiave fino a nuova rotazione. | Must |
 
 ### 2.4 Comandi lato client
 
@@ -202,9 +205,10 @@ rinviabile), `Could` (se avanza tempo), `Won't` (esplicitamente fuori dall'MVP).
 
 | ID | Requisito | Priorità |
 |---|---|---|
-| RF-C-28 | **Lascia stanza** riporta alla schermata di selezione stanza, mantenendo la connessione. | Must |
-| RF-C-29 | Alla chiusura della finestra il client si disconnette in modo pulito. | Must |
+| RF-C-28 | **Lascia stanza** chiede **conferma esplicita** prima di procedere; confermato, invia `leave` e riporta alla schermata di selezione stanza, mantenendo la connessione. | Must |
+| RF-C-29 | Alla chiusura della finestra (`Window.Closing`), se il client è in una stanza attiva intercetta l'evento e richiede **conferma modale** (*"Vuoi davvero uscire? La conversazione andrà persa definitivamente"*). Se confermato, si disconnette in modo pulito. | Must |
 | RF-C-30 | Se il server cade, il client lo segnala, scarta i messaggi e torna alla schermata di connessione senza chiudersi. | Must |
+| RF-C-30b | In caso di disconnessione brusca della rete, il client avvisa che un rientro immediato potrebbe scontrarsi con la sessione fantasma sul server (~60 s), ricevendo un nickname numerato e richiedendo nuova ammissione. | Should |
 | RF-C-31 | Il client non scrive mai i messaggi su disco. | Must |
 | RF-C-32 | Riconnessione automatica dopo caduta della rete. | Could |
 

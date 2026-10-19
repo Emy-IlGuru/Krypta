@@ -126,10 +126,10 @@ usa **solo** quello — anche per calcolare il proprio colore.
 |                                                  |
 |   ID della stanza                                |
 |                                                  |
-|          +----------------------------+          |
-|          |         K 7 X 2 M 9        |          |
-|          +----------------------------+          |
-|          Sei caratteri: lettere o numeri.        |
+|   +----------------------------+  +----------+   |
+|   |         K 7 X 2 M 9        |  |  Genera  |   |
+|   +----------------------------+  +----------+   |
+|   Sei caratteri: lettere o numeri.               |
 |                                                  |
 |   Messaggio per chi ti dovra' accettare          |
 |   +------------------------------------------+   |
@@ -155,6 +155,7 @@ usa **solo** quello — anche per calcolare il proprio colore.
 | Elemento | Comportamento |
 |---|---|
 | ID stanza | Campo grande, monospace, **6 caratteri alfanumerici**. Incollando testo misto, i caratteri non validi (spazi, punteggiatura, accenti) vengono scartati |
+| Genera | Pulsante accanto al campo ID. Genera un ID casuale conforme `[A-Z0-9]{6}` con `RandomNumberGenerator`. Evita ID deboli o prevedibili e mitiga la corsa all'ID |
 | Maiuscole | **Il campo converte in maiuscolo mentre si digita.** L'utente può battere `k7x2m9` e vedere comparire `K7X2M9`: la regola diventa invisibile |
 | Messaggio | **Precompilato** con *"Hey, mi vorrei unire alla stanza"*, modificabile, max 200 caratteri su **una riga sola** (l'`Invio` non va a capo: conferma). Svuotarlo è legittimo — il campo semplicemente non viene inviato |
 | Avvertenza sul messaggio | **Obbligatoria e sempre visibile**, non dietro un'icona: dice che il testo non è cifrato. È l'unico testo scritto dall'utente che l'E2EE non copre, e in un'app che altrove cifra tutto la cosa è controintuitiva ([03 §7bis.6](03-protocollo.md)) |
@@ -181,6 +182,15 @@ capire perché. Convertendo durante la digitazione, il vincolo non si vede mai.
 Il font monospace non è estetica: distingue `0` da `O` e `1` da `I`, che in un font
 proporzionale sono quasi identici. Un ID trascritto male non dà errore — porta in una
 stanza nuova e vuota.
+
+**Perché il pulsante «Genera» e la regola «crea prima, condividi poi».** Chi crea una stanza
+genera la chiave di cifratura ed è il primo approvatore. Se due persone concordano un ID
+prima che la stanza sia stata effettivamente aperta (es. via messaggio: *"ci vediamo su
+Krypta stanza ABC123 fra 5 minuti"*), un terzo incomodo o uno scanner può inviare il `join`
+per primo, insediandosi come creatore/proprietario di fatto della stanza (corsa all'ID / host
+hijacking). Generando l'ID tramite il pulsante «Genera» (`RandomNumberGenerator`) ed entrando
+**prima** di comunicare l'ID, la stanza nasce protetta. L'ID generato è copiabile con un clic
+dall'intestazione della chat per invitarne altri.
 
 **Non c'è nessun campo per il nome della stanza.** Una stanza nuova nasce come
 `RM-K7X2M9` e si rinomina dopo, dall'interno, con `/NameRoom` (§5.5).
@@ -300,7 +310,7 @@ rifiutato non deve poter dedurre se è stato respinto di proposito o solo ignora
 | ID stanza | Dopo il nome | `#K7X2M9`, monospace, colore attenuato. **Cliccabile per copiarlo** — è il modo naturale per invitare qualcuno |
 | **Attesa (N)** | Al centro-destra | **Pulsante nuovo.** Compare solo quando `N > 0`, con un accento visivo che lo renda notabile. Apre il pannello §5.1bis |
 | Numero partecipanti | Destra, piccolo | `3/20`, colore attenuato. Aggiornato dal messaggio `participants` |
-| Lascia stanza | Estrema destra | Invia `leave`, torna a [3] |
+| Lascia stanza | Estrema destra | **Chiede conferma esplicita** ("Abbandonare la stanza? La cronologia andrà persa definitivamente.") prima di inviare `leave` e tornare a [3] |
 
 Il contatore non è cliccabile: per l'elenco dei nomi si usa `/Users`, che è visibile a
 tutti per scelta.
@@ -485,6 +495,15 @@ Comportamenti richiesti:
   un'espulsione che non avviene — vedendosi restare in stanza la persona che voleva
   togliere, senza capire perché. Il comando non caccia nessuno: taglia fuori chi è **già**
   uscito ([03 §6.6](03-protocollo.md)).
+- **Azione rapida su `user_left`** → all'arrivo del messaggio `system` *"{nick} è uscito dalla stanza"*,
+  il client mostra un chip/pulsante discreto: `[Rigenera chiave]`. Cliccandoci si apre il dialogo di conferma
+  di `/GenerateKey`. Impedisce che la protezione post-uscita resti disattesa perché gli utenti dimenticano
+  di digitare il comando a mano.
+- **Conferma chiusura finestra (`Window.Closing`)** → se l'utente tenta di chiudere la finestra (`Alt+F4`,
+  pulsante `X` dell'OS) mentre si trova nella stanza attiva ([4]) o in attesa ([3b]), il client intercetta
+  l'evento e mostra un dialogo modale di conferma:
+  *"Se chiudi la finestra abbandonerai la stanza e la conversazione andrà persa definitivamente. Vuoi uscire?"*
+  con **Annulla** ed **Esci**. Impedisce la distruzione accidentale e istantanea della sessione.
 - **`clear` in arrivo** → svuota `Messages`. Subito dopo arriva il `system`
   `room_cleared` che dice chi è stato: quella riga resta visibile.
 - I messaggi locali di errore (comando sconosciuto, argomento non valido) sono **solo per
@@ -739,15 +758,26 @@ crash intermittenti difficili da riprodurre. Con ReactiveUI l'alternativa idioma
 in tutto il progetto se ne usi **una sola**, altrimenti non si capisce più quali percorsi
 siano già stati marshalati.
 
-## 8. Caduta del server
+## 8. Caduta del server e della rete
 
-Alla `Disconnected` inattesa:
+### 8.1 Disconnessione dal server
+Alla `Disconnected` inattesa (chiusura del socket, errore di rete o server spento):
 
-1. Si scarta l'intera collezione dei messaggi (niente resta in memoria).
+1. Si scarta l'intera collezione dei messaggi e le chiavi di stanza (niente resta in memoria).
 2. Si torna a [1] con "Connessione al server persa."
-3. Host, porta e nickname restano precompilati.
+3. Host, porta e nickname restano precompilati per facilitare il rientro.
 
-Nessuna riconnessione automatica nell'MVP.
+Nessuna riconnessione automatica invisibile nell'MVP.
+
+### 8.2 Caduta brusca della rete e partecipanti fantasma
+In caso di caduta improvvisa della connessione (Wi-Fi interrotto o cambio rete senza `close` TCP pulito):
+
+- **Lato server:** il vecchio socket resta registrato per un massimo di 60 secondi prima che l'`HeartbeatService` ne constati l'inattività ed emetta `user_left`.
+- **Rientro immediato dell'utente:** se l'utente si ricollega subito alla stessa stanza prima dei 60 secondi:
+  1. Il nickname originario è ancora occupato dal suo "fantasma", quindi riceve il nome incrementato (es. `emy` diventa `emy2`).
+  2. La stanza è ancora viva, quindi finisce in sala d'attesa e deve essere ri-approvato da chi è dentro.
+  3. All'ammissione, non essendoci persistenza, lo schermo locale della chat riparte pulito.
+- **Comportamento del client:** il client informa chiaramente l'utente di questa finestra (*"Connessione persa. Se rientri subito potresti comparire temporaneamente con un numero (es. emy2) finché il server non rimuove la sessione precedente"*), evitando che l'utente pensi a un malfunzionamento o a un furto d'identità. Il server non consente il subentro forzato (session takeover) per preservare la sicurezza crittografica.
 
 ## 9. Persistenza lato client
 

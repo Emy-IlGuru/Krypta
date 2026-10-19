@@ -1,6 +1,7 @@
 using System.Diagnostics;
 using Krypta.Server.Connections;
 using Krypta.Server.Messaging;
+using Krypta.Server.RateLimiting;
 using Krypta.Server.Rooms;
 
 const string WebSocketSubprotocol = "krypta.v1";
@@ -11,7 +12,9 @@ builder.Services.AddSingleton(TimeProvider.System);
 builder.Services.AddSingleton<RoomManager>();
 builder.Services.AddSingleton<ConnectionRegistry>();
 builder.Services.AddSingleton<ProtocolMessageSender>();
-builder.Services.AddSingleton<ICommandHandler, DeferredCommandHandler>();
+builder.Services.AddSingleton<ICommandHandler, CommandHandler>();
+builder.Services.AddSingleton<ActionRateLimiter>();
+builder.Services.AddSingleton<JoinRateLimiter>();
 builder.Services.AddSingleton<MessageDispatcher>();
 builder.Services.AddSingleton<ConnectionHandler>();
 builder.Services.AddHostedService<HeartbeatService>();
@@ -52,7 +55,9 @@ app.Map("/ws", async context =>
     ConnectionHandler handler = context.RequestServices
         .GetRequiredService<ConnectionHandler>();
     await handler.HandleAsync(
-        new WebSocketClientConnection(socket),
+        new WebSocketClientConnection(
+            socket,
+            context.Connection.RemoteIpAddress?.ToString()),
         context.RequestAborted);
 });
 

@@ -401,6 +401,19 @@ traffico verso tutta la stanza.
 chiude quelle il cui `LastSeen` è più vecchio di 60 secondi — passando dal normale
 percorso di uscita, così gli altri partecipanti ricevono `user_left` e `participants`.
 
+**Finestra del partecipante fantasma e session takeover.** Se un client si disconnette bruscamente
+(es. perdita connettività di rete senza chiusura TCP pulita), il server non può rilevarlo
+istantaneamente: il partecipante resta presente per un massimo di 60 secondi. Se lo stesso utente
+si riconnette immediatamente con lo stesso nickname e chiede di entrare nella stessa stanza, il server
+tratta la connessione come **indipendente**:
+- assegna un nickname numerato (es. `emy2`) poiché `emy` risulta ancora connesso;
+- accoda la richiesta in sala d'attesa (la stanza è viva);
+- **non ammette subentri forzati (session takeover)**. Consentire a una nuova connessione di "rubare"
+  il posto di una precedente basandosi solo su IP e nickname aprirebbe una grave vulnerabilità di
+  impersonificazione su reti condivise (NAT, Wi-Fi aziendale). La pulizia spetta unicamente
+  all'`HeartbeatService`. All'espulsione del socket zombie, gli altri client ricevono regolarmente
+  `user_left`.
+
 ## 5. Generazione dell'ID stanza
 
 Nell'MVP **l'ID lo sceglie l'utente**: lo digita nel client. Il server **valida e basta**,

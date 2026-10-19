@@ -1,4 +1,5 @@
 using System.Text.Json;
+using Krypta.Server.RateLimiting;
 using Krypta.Server.Rooms;
 using Krypta.Shared;
 using Krypta.Shared.Protocol;
@@ -9,6 +10,8 @@ public sealed class MessageDispatcher(
     RoomManager roomManager,
     ProtocolMessageSender sender,
     ICommandHandler commandHandler,
+    ActionRateLimiter actionRateLimiter,
+    JoinRateLimiter joinRateLimiter,
     TimeProvider timeProvider)
 {
     public async ValueTask DispatchAsync(
@@ -38,6 +41,19 @@ public sealed class MessageDispatcher(
         switch (message)
         {
             case JoinClientMessage join:
+                // Il controllo sta qui e non all'apertura della connessione: conta ogni
+                // tentativo, quindi leave+join ripetuti non aggirano il limite (04 §4.6).
+                if (!joinRateLimiter.TryJoin(
+                    participant.RemoteAddress,
+                    out int joinRetryAfter))
+                {
+                    sender.SendError(
+                        participant,
+                        ErrorCodes.JoinRateLimited,
+                        joinRetryAfter);
+                    break;
+                }
+
                 DispatchJoin(participant, join);
                 break;
             case ChatClientMessage chat:
@@ -47,6 +63,15 @@ public sealed class MessageDispatcher(
                 if (participant.CurrentRoom is null)
                 {
                     sender.SendError(participant, ErrorCodes.NotInRoom);
+                }
+                else if (!actionRateLimiter.TryCommand(
+                    participant,
+                    out int commandRetryAfter))
+                {
+                    sender.SendError(
+                        participant,
+                        ErrorCodes.CommandRateLimited,
+                        commandRetryAfter);
                 }
                 else
                 {
@@ -100,6 +125,10 @@ public sealed class MessageDispatcher(
             return;
         }
 
+        // Il nickname va letto PRIMA di Leave: uscendo la connessione lo perde,
+        // e senza non si può più dire a chi si riferisce l'annuncio.
+        string nickname = participant.Nickname!;
+
         LeaveResult result = roomManager.Leave(participant);
         if (!result.Succeeded)
         {
@@ -109,7 +138,9 @@ public sealed class MessageDispatcher(
         SendReleasedPending(room, result.ReleasedPending);
         if (!result.RoomDestroyed)
         {
-            BroadcastRoomState(room);
+            BroadcastRoomState(
+                room,
+                SystemMessages.UserLeft(nickname, timeProvider.GetUtcNow()));
         }
     }
 
@@ -142,11 +173,19 @@ public sealed class MessageDispatcher(
             sender.Send(participant, new PendingServerMessage(
                 room.Id,
                 KryptaLimits.JoinApprovalTimeoutSeconds));
-            BroadcastWaiting(room);
+            BroadcastWaiting(
+                room,
+                SystemMessages.JoinRequested(
+                    result.RequestedNickname!,
+                    timeProvider.GetUtcNow()));
             return;
         }
 
-        BroadcastRoomState(room);
+        BroadcastRoomState(
+            room,
+            SystemMessages.RoomCreated(
+                result.EffectiveNickname!,
+                timeProvider.GetUtcNow()));
     }
 
     private void DispatchChat(Participant participant, ChatClientMessage message)
@@ -176,6 +215,12 @@ public sealed class MessageDispatcher(
         if (ciphertext.Length > KryptaLimits.MaxCiphertextBytes)
         {
             sender.SendError(participant, ErrorCodes.MessageTooLong);
+            return;
+        }
+
+        if (!actionRateLimiter.TryMessage(participant))
+        {
+            sender.SendError(participant, ErrorCodes.RateLimited);
             return;
         }
 
@@ -218,11 +263,22 @@ public sealed class MessageDispatcher(
             sender.Send(requester, new RejectedServerMessage(
                 room.Id,
                 result.RejectionReason!));
-            BroadcastWaiting(room);
+            BroadcastWaiting(
+                room,
+                SystemMessages.JoinRejected(
+                    participant.Nickname!,
+                    result.RequestedNickname!,
+                    timeProvider.GetUtcNow()));
             return;
         }
 
-        BroadcastRoomState(room, includeWaiting: true);
+        BroadcastRoomState(
+            room,
+            SystemMessages.UserJoined(
+                result.EffectiveNickname!,
+                participant.Nickname!,
+                timeProvider.GetUtcNow()),
+            includeWaiting: true);
     }
 
     private void DispatchReject(Participant participant, RejectClientMessage message)
@@ -237,7 +293,12 @@ public sealed class MessageDispatcher(
         sender.Send(result.Requester!, new RejectedServerMessage(
             result.Room!.Id,
             result.RejectionReason!));
-        BroadcastWaiting(result.Room);
+        BroadcastWaiting(
+            result.Room,
+            SystemMessages.JoinRejected(
+                participant.Nickname!,
+                result.RequestedNickname!,
+                timeProvider.GetUtcNow()));
     }
 
     private void DispatchCancel(Participant participant)
@@ -259,6 +320,8 @@ public sealed class MessageDispatcher(
     private void DispatchLeave(Participant participant)
     {
         Room? room = participant.CurrentRoom;
+        string? nickname = participant.Nickname;
+
         LeaveResult result = roomManager.Leave(participant);
         if (!result.Succeeded)
         {
@@ -271,19 +334,22 @@ public sealed class MessageDispatcher(
 
         if (!result.RoomDestroyed)
         {
-            BroadcastRoomState(room);
+            BroadcastRoomState(
+                room,
+                SystemMessages.UserLeft(nickname!, timeProvider.GetUtcNow()));
         }
     }
 
-    private void BroadcastRoomState(Room room, bool includeWaiting = false)
+    /// <summary>
+    /// L'ordine è vincolante e segue 03 §10: prima la coda d'attesa aggiornata,
+    /// poi la riga di sistema che spiega cos'è successo, poi il nuovo conteggio.
+    /// </summary>
+    private void BroadcastRoomState(
+        Room room,
+        SystemServerMessage? announcement = null,
+        bool includeWaiting = false)
     {
-        List<ServerMessage> messages =
-        [
-            new ParticipantsServerMessage(room.ParticipantCount),
-            new RosterServerMessage(
-                room.KeyEpoch,
-                roomManager.GetRosterSnapshot(room))
-        ];
+        List<ServerMessage> messages = [];
 
         if (includeWaiting)
         {
@@ -291,12 +357,33 @@ public sealed class MessageDispatcher(
                 roomManager.GetWaitingSnapshot(room)));
         }
 
+        if (announcement is not null)
+        {
+            messages.Add(announcement);
+        }
+
+        messages.Add(new ParticipantsServerMessage(room.ParticipantCount));
+        messages.Add(new RosterServerMessage(
+            room.KeyEpoch,
+            roomManager.GetRosterSnapshot(room)));
+
         sender.Broadcast(room, messages.ToArray());
     }
 
-    private void BroadcastWaiting(Room room) =>
-        sender.Broadcast(room, new WaitingServerMessage(
-            roomManager.GetWaitingSnapshot(room)));
+    private void BroadcastWaiting(Room room, SystemServerMessage? announcement = null)
+    {
+        List<ServerMessage> messages =
+        [
+            new WaitingServerMessage(roomManager.GetWaitingSnapshot(room))
+        ];
+
+        if (announcement is not null)
+        {
+            messages.Add(announcement);
+        }
+
+        sender.Broadcast(room, messages.ToArray());
+    }
 
     private void SendReleasedPending(
         Room room,

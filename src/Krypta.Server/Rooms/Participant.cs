@@ -1,6 +1,7 @@
 using System.Text;
 using System.Threading.Channels;
 using Krypta.Server.Connections;
+using Krypta.Server.RateLimiting;
 using Krypta.Shared;
 
 namespace Krypta.Server.Rooms;
@@ -41,6 +42,17 @@ public sealed class Participant : IDisposable
     }
 
     public Guid ConnectionId { get; }
+
+    /// <summary>Indirizzo remoto, per il solo <c>JoinRateLimiter</c>.</summary>
+    public string? RemoteAddress => _connection.RemoteAddress;
+
+    // Finestre di frequenza per connessione: vivono e muoiono con essa,
+    // quindi non c'è niente da ripulire e niente che possa accumularsi.
+    internal SlidingWindow MessageWindow { get; } =
+        ActionRateLimiter.CreateMessageWindow();
+
+    internal SlidingWindow CommandWindow { get; } =
+        ActionRateLimiter.CreateCommandWindow();
 
     public string? PublicKey => Volatile.Read(ref _membership).PublicKey;
 

@@ -22,6 +22,8 @@ internal sealed class FakeClientConnection : IClientConnection
 
     public TimeSpan SendDelay { get; init; }
 
+    public string? RemoteAddress { get; init; }
+
     public bool Aborted { get; private set; }
 
     public WebSocketCloseStatus? OutputCloseStatus { get; private set; }

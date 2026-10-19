@@ -1,6 +1,7 @@
 using System.Text.Json;
 using Krypta.Server.Connections;
 using Krypta.Server.Messaging;
+using Krypta.Server.RateLimiting;
 using Krypta.Server.Rooms;
 using Krypta.Server.Tests.TestDoubles;
 using Krypta.Shared;
@@ -65,6 +66,7 @@ public sealed class HeartbeatServiceTests
         return new HeartbeatService(
             registry,
             new ProtocolMessageSender(manager),
+            new JoinRateLimiter(new FixedTimeProvider(Now)),
             new FixedTimeProvider(Now),
             NullLogger<HeartbeatService>.Instance);
     }

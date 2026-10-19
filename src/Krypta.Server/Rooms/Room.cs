@@ -24,7 +24,11 @@ public sealed class Room
 
     public string Id { get; }
 
-    public string Name { get; }
+    /// <summary>
+    /// Etichetta di visualizzazione, mutabile con <c>/NameRoom</c>. Non rende la stanza
+    /// cercabile: l'ID resta l'unico modo per collegarsi. Muore con la stanza.
+    /// </summary>
+    public string Name { get; internal set; }
 
     public DateTimeOffset CreatedAt { get; }
 

@@ -1,5 +1,6 @@
 using System.Text.Json;
 using Krypta.Server.Messaging;
+using Krypta.Server.RateLimiting;
 using Krypta.Server.Rooms;
 using Krypta.Server.Tests.TestDoubles;
 using Krypta.Shared;
@@ -258,6 +259,8 @@ public sealed class MessageDispatcherTests
             manager,
             sender,
             commandHandler,
+            new ActionRateLimiter(new FixedTimeProvider(FixedNow)),
+            new JoinRateLimiter(new FixedTimeProvider(FixedNow)),
             new FixedTimeProvider(FixedNow));
     }
 

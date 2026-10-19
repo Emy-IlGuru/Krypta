@@ -187,7 +187,7 @@ public sealed class RoomManager
                 _timeProvider.GetUtcNow());
             room.AddPending(request);
             participant.Wait(room, request.RequestId, publicKey);
-            return JoinResult.Pending(room, request.RequestId);
+            return JoinResult.Pending(room, request.RequestId, request.RequestedNickname);
         }
     }
 
@@ -232,7 +232,8 @@ public sealed class RoomManager
                 return ApprovalResult.Rejected(
                     room,
                     request.Connection,
-                    RejectionReasons.RoomFull);
+                    RejectionReasons.RoomFull,
+                    request.RequestedNickname);
             }
 
             string effectiveNickname = NicknameAllocator.Allocate(
@@ -277,7 +278,48 @@ public sealed class RoomManager
             return ApprovalResult.Rejected(
                 room,
                 request.Connection,
-                RejectionReasons.Rejected);
+                RejectionReasons.Rejected,
+                request.RequestedNickname);
+        }
+    }
+
+    /// <summary>
+    /// Rinomina la stanza. Il server rivalida sempre l'argomento, anche se il client
+    /// lo ha già validato: un client modificato può inviare qualsiasi cosa (07 §9, regola 5).
+    /// </summary>
+    public OperationResult Rename(Participant participant, string? requestedName)
+    {
+        ArgumentNullException.ThrowIfNull(participant);
+
+        lock (_gate)
+        {
+            Room? room = participant.CurrentRoom;
+            if (room is null)
+            {
+                return OperationResult.Error(ErrorCodes.NotInRoom);
+            }
+
+            if (!RoomNameNormalizer.TryNormalize(requestedName, out string normalized))
+            {
+                return OperationResult.Error(ErrorCodes.InvalidCommandArg);
+            }
+
+            room.Name = normalized;
+            return OperationResult.Success();
+        }
+    }
+
+    /// <summary>
+    /// Elenco dei nickname in ordine di ingresso (invariante I7). Costruito al momento
+    /// della richiesta e non conservato da nessuna parte.
+    /// </summary>
+    public IReadOnlyList<string> ListNicknames(Room room)
+    {
+        ArgumentNullException.ThrowIfNull(room);
+
+        lock (_gate)
+        {
+            return [.. room.Participants.Select(participant => participant.Nickname!)];
         }
     }
 

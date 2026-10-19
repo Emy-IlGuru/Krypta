@@ -15,13 +15,18 @@ public sealed record JoinResult(
     bool Created = false,
     string? EffectiveNickname = null,
     Guid? RequestId = null,
-    string? ErrorCode = null)
+    string? ErrorCode = null,
+    string? RequestedNickname = null)
 {
     internal static JoinResult Joined(Room room, string nickname) =>
         new(JoinOutcome.Joined, room, Created: true, EffectiveNickname: nickname);
 
-    internal static JoinResult Pending(Room room, Guid requestId) =>
-        new(JoinOutcome.Pending, room, RequestId: requestId);
+    internal static JoinResult Pending(Room room, Guid requestId, string requestedNickname) =>
+        new(
+            JoinOutcome.Pending,
+            room,
+            RequestId: requestId,
+            RequestedNickname: requestedNickname);
 
     internal static JoinResult Error(string errorCode, Room? room = null) =>
         new(JoinOutcome.Error, room, ErrorCode: errorCode);
@@ -41,7 +46,8 @@ public sealed record ApprovalResult(
     string? EffectiveNickname = null,
     WrappedKey? WrappedKey = null,
     string? RejectionReason = null,
-    string? ErrorCode = null)
+    string? ErrorCode = null,
+    string? RequestedNickname = null)
 {
     internal static ApprovalResult Approved(
         Room room,
@@ -58,12 +64,14 @@ public sealed record ApprovalResult(
     internal static ApprovalResult Rejected(
         Room room,
         Participant requester,
-        string reason) =>
+        string reason,
+        string requestedNickname) =>
         new(
             ApprovalOutcome.Rejected,
             room,
             requester,
-            RejectionReason: reason);
+            RejectionReason: reason,
+            RequestedNickname: requestedNickname);
 
     internal static ApprovalResult Error(string errorCode, Room? room = null) =>
         new(ApprovalOutcome.Error, room, ErrorCode: errorCode);

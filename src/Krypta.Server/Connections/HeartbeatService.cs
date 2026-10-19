@@ -1,4 +1,5 @@
 using Krypta.Server.Messaging;
+using Krypta.Server.RateLimiting;
 using Krypta.Server.Rooms;
 using Krypta.Shared;
 using Krypta.Shared.Protocol;
@@ -8,6 +9,7 @@ namespace Krypta.Server.Connections;
 public sealed class HeartbeatService(
     ConnectionRegistry registry,
     ProtocolMessageSender sender,
+    JoinRateLimiter joinRateLimiter,
     TimeProvider timeProvider,
     ILogger<HeartbeatService> logger) : BackgroundService
 {
@@ -15,6 +17,14 @@ public sealed class HeartbeatService(
     {
         DateTimeOffset now = timeProvider.GetUtcNow();
         TimeSpan timeout = TimeSpan.FromSeconds(KryptaLimits.ConnectionTimeoutSeconds);
+
+        // Le voci scadute del limite sui join vanno ripulite, altrimenti il dizionario
+        // cresce quanto il numero di indirizzi che hanno mai bussato (04 §4.6).
+        int pruned = joinRateLimiter.Prune();
+        if (pruned > 0)
+        {
+            logger.LogDebug("Voci scadute rimosse dal limite sui join: {Pruned}", pruned);
+        }
 
         foreach (Participant participant in registry.Snapshot())
         {

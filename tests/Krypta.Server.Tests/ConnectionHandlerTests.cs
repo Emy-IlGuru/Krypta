@@ -2,6 +2,7 @@ using System.Text.Json;
 using System.Net.WebSockets;
 using Krypta.Server.Connections;
 using Krypta.Server.Messaging;
+using Krypta.Server.RateLimiting;
 using Krypta.Server.Rooms;
 using Krypta.Server.Tests.TestDoubles;
 using Krypta.Shared;
@@ -88,7 +89,9 @@ public sealed class ConnectionHandlerTests
         MessageDispatcher dispatcher = new(
             manager,
             sender,
-            new DeferredCommandHandler(sender),
+            new CommandHandler(manager, sender, TimeProvider.System),
+            new ActionRateLimiter(TimeProvider.System),
+            new JoinRateLimiter(TimeProvider.System),
             TimeProvider.System);
         return new ConnectionHandler(
             registry,

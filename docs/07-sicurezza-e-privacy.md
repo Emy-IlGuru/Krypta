@@ -174,10 +174,15 @@ Tre limiti da tenere presenti, tutti reali:
    messaggio non sostituisce e con cui non va confuso: uno è testo scelto da chi bussa,
    l'altro è derivato dalla sua chiave.
 
-2. **Il primo che arriva entra senza approvazione.** È inevitabile — non c'è nessuno
-   dentro che possa approvarlo — ma ha una conseguenza pratica: chi vuole una stanza
-   protetta deve **crearla per primo**. Se un estraneo occupa quell'ID prima, sarà lui a
-   decidere chi entra.
+2. **Il primo che arriva entra senza approvazione (Corsa all'ID / Host Hijacking).**
+   È inevitabile — non c'è nessuno dentro che possa approvarlo — ma introduce una superficie:
+   se due persone concordano un ID prima che uno di essi abbia aperto la stanza (es. *"ci vediamo
+   in stanza K7X2M9"*), un terzo incomodo o uno scanner può precederli e diventare il creatore
+   della stanza, generando la chiave e controllando gli accessi.
+   
+   **Mitigazione:** la regola d'oro è **«crea prima, condividi poi»** (entri, crei la stanza e copi
+   l'ID con un clic per invitarne altri), unita al pulsante **«Genera ID»** (`RandomNumberGenerator`)
+   integrato nella schermata [3] del client (RF-C-07b).
 
 3. **La sala d'attesa è un nuovo bersaglio.** Bussare ripetutamente genera righe nella
    conversazione e notifiche a tutti. Mitigato dal tetto di 10 richieste e dal limite di 5
@@ -193,12 +198,19 @@ Tre limiti da tenere presenti, tutti reali:
    successiva è mostrare la sola riga *"ha lasciato un messaggio"* e il testo dietro un
    clic ([ADR-0010](adr/0010-messaggio-di-richiesta.md)).
 
+4. **Rischio dell'approvatore singolo in stanze numerose (In sospeso).** Basta che **un solo**
+   partecipante distratto o ingannato accetti una richiesta in attesa per ammettere un utente e
+   consegnargli la chiave crittografica della stanza. In un gruppo di 10–20 persone, la sicurezza
+   dipende dall'anello più debole. Introdurre quorum o votazioni a maggioranza è stato valutato
+   ed escluso per l'MVP: aggiungerebbe un attrito intollerabile per un prodotto «usa e getta».
+   Il punto resta **in sospeso** per monitorare l'uso reale.
+
 Restano disponibili, non adottate ora:
 
 | Mitigazione | Perché non ora |
 |---|---|
 | ~~Password di stanza~~ | **Rimossa dai piani.** Serviva a impedire che conoscere l'ID bastasse per entrare: è esattamente ciò che ora fa la sala d'attesa (§4.2), senza un secondo segreto da comunicare |
-| **Generatore di ID casuali** nel client | Un pulsante "genera" con `RandomNumberGenerator` toglierebbe di mezzo il problema degli ID scelti a mano. Costa poco: buon candidato appena l'MVP funziona |
+| ~~**Generatore di ID casuali** nel client~~ | **Adottato in fase 1A.5 (RF-C-07b)**: pulsante accanto all'ID che toglie di mezzo gli ID prevedibili e la corsa all'ID |
 | Allungare l'ID oltre i 6 caratteri | Non serve più: 36⁶ è abbondante. E 6 caratteri restano dettabili al telefono |
 | Nascondere il flag `created` | Inefficace: la stanza esistente si deduce comunque dal contatore partecipanti |
 
@@ -317,7 +329,9 @@ Da non tacere in nessuna descrizione del prodotto:
    ([ADR-0011](adr/0011-rotazione-chiave-di-stanza.md)) un partecipante taglia fuori chi è
    già uscito, in modo definitivo: la chiave nuova non è derivabile dalla vecchia. Ma la
    rotazione è **manuale**, quindi la protezione vale solo se qualcuno si ricorda di
-   usarla. Il limite non è chiuso: è passato da strutturale a dipendente da un gesto.
+   usarla. Il limite è mitigato sul piano dell'usabilità: all'arrivo di `user_left` il client
+   mostra un'**azione rapida contestuale per `/GenerateKey`** (RF-C-20b), ricordando a chi è
+   dentro di ruotare la chiave con un solo clic.
 3. **Qualunque partecipante può cedere la chiave.** Irrisolvibile: chi legge può copiare.
    E dopo una rotazione può cedere anche quella nuova: `/GenerateKey` protegge da chi è
    uscito, non da chi è dentro.
@@ -336,6 +350,13 @@ Da non tacere in nessuna descrizione del prodotto:
    applicabile: chi entra a metà conversazione non ha mai visto le chiavi di chi era già
    dentro. È il prezzo dell'assenza di identità persistenti, ed è lo stesso motivo per cui
    il punto 1 non è risolvibile.
+7. **Finestra del partecipante fantasma su disconnessione brusca della rete.** Se un client
+   cade senza chiusura TCP pulita, il server mantiene il socket registrato fino a 60 s prima
+   che l'heartbeat rilevi l'inattività. Un rientro immediato non può effettuare il subentro
+   arbitrario della sessione (session takeover) perché Krypta non possiede credenziali o token
+   persistenti (ammetterlo aprirebbe a furti di sessione da parte di chiunque condivida l'IP).
+   Il rientrante riceve quindi un nickname numerato (es. `emy2`) e deve essere ri-approvato in
+   sala d'attesa.
 
 Un protocollo a ratchet (Double Ratchet, MLS) risolverebbe i punti 1, 2 e 6, ma richiede
 identità persistenti per dispositivo: l'opposto di questo prodotto. Non è in programma.
