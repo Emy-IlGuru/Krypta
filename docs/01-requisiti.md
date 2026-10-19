@@ -185,7 +185,7 @@ rinviabile), `Could` (se avanza tempo), `Won't` (esplicitamente fuori dall'MVP).
 | RF-C-18 | In basso: casella di testo e pulsante **Invia**. `Invio` invia, `Shift+Invio` va a capo. | Must |
 | RF-C-19 | Il messaggio inviato compare **solo quando torna dal server** (eco). La casella si svuota subito. | Must |
 | RF-C-20 | L'area messaggi scorre in fondo all'arrivo di un nuovo messaggio **solo se** l'utente è già in fondo. | Should |
-| RF-C-20b | All'arrivo di un `system` `user_left`, il client propone un'**azione rapida contestuale per `/GenerateKey`** (promemoria discreto/pulsante "Rigenera chiave"), ricordando che chi è uscito conserva la chiave fino a nuova rotazione. | Must |
+| RF-C-20b | All'arrivo di un `system` `user_left`, il client propone un'**azione rapida contestuale per `/GenerateKey`** (promemoria discreto/pulsante "Rigenera chiave"), ricordando che chi è uscito conserva la chiave fino a nuova rotazione. Se qualcun altro ruota per primo il chip sparisce, e `REKEY_RATE_LIMITED`/`STALE_KEY_EPOCH` non si mostrano come errori ([05 §5.4](05-client-desktop.md)). | Must |
 
 ### 2.4 Comandi lato client
 
@@ -206,7 +206,7 @@ rinviabile), `Could` (se avanza tempo), `Won't` (esplicitamente fuori dall'MVP).
 | ID | Requisito | Priorità |
 |---|---|---|
 | RF-C-28 | **Lascia stanza** chiede **conferma esplicita** prima di procedere; confermato, invia `leave` e riporta alla schermata di selezione stanza, mantenendo la connessione. | Must |
-| RF-C-29 | Alla chiusura della finestra (`Window.Closing`), se il client è in una stanza attiva intercetta l'evento e richiede **conferma modale** (*"Vuoi davvero uscire? La conversazione andrà persa definitivamente"*). Se confermato, si disconnette in modo pulito. | Must |
+| RF-C-29 | Alla chiusura della finestra (`Window.Closing`), se il client è in una stanza attiva [4] **o in sala d'attesa [3b]**, intercetta l'evento e richiede **conferma modale** prima di procedere; il testo esatto è in [05 §5.4](05-client-desktop.md). Se confermato, si disconnette in modo pulito. | Must |
 | RF-C-30 | Se il server cade, il client lo segnala, scarta i messaggi e torna alla schermata di connessione senza chiudersi. | Must |
 | RF-C-30b | In caso di disconnessione brusca della rete, il client avvisa che un rientro immediato potrebbe scontrarsi con la sessione fantasma sul server (~60 s), ricevendo un nickname numerato e richiedendo nuova ammissione. | Should |
 | RF-C-31 | Il client non scrive mai i messaggi su disco. | Must |

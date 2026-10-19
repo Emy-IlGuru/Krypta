@@ -78,8 +78,8 @@ public sealed class CommandHandlerTests
         foreach (TestParticipant everyone in new[] { owner, second, third })
         {
             SystemServerMessage list = Assert.Single(
-                (await everyone.FinishAsync()).Systems()
-                    .Where(item => item.Kind == SystemKinds.UserList));
+                (await everyone.FinishAsync()).Systems(),
+                item => item.Kind == SystemKinds.UserList);
             Assert.Equal(["emy", "luca", "sara"], list.Users);
             Assert.Equal("Partecipanti (3/20): emy, luca, sara", list.Text);
         }
@@ -102,8 +102,8 @@ public sealed class CommandHandlerTests
         Assert.True(clear < announcement);
 
         SystemServerMessage cleared = Assert.Single(
-            (await other.FinishAsync()).Systems()
-                .Where(item => item.Kind == SystemKinds.RoomCleared));
+            (await other.FinishAsync()).Systems(),
+            item => item.Kind == SystemKinds.RoomCleared);
         Assert.Equal("luca ha svuotato la stanza", cleared.Text);
     }
 

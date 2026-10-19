@@ -17,6 +17,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Krypta.Server.Tests", "test
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Krypta.Protocol.Tests", "tests\Krypta.Protocol.Tests\Krypta.Protocol.Tests.csproj", "{3D291445-1D9D-4778-822A-E425A7F91BE6}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Krypta.Client.Tests", "tests\Krypta.Client.Tests\Krypta.Client.Tests.csproj", "{C43A5142-7A7E-4F73-B94D-528A0371F9A8}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -87,6 +89,18 @@ Global
 		{3D291445-1D9D-4778-822A-E425A7F91BE6}.Release|x64.Build.0 = Release|Any CPU
 		{3D291445-1D9D-4778-822A-E425A7F91BE6}.Release|x86.ActiveCfg = Release|Any CPU
 		{3D291445-1D9D-4778-822A-E425A7F91BE6}.Release|x86.Build.0 = Release|Any CPU
+		{C43A5142-7A7E-4F73-B94D-528A0371F9A8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C43A5142-7A7E-4F73-B94D-528A0371F9A8}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C43A5142-7A7E-4F73-B94D-528A0371F9A8}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{C43A5142-7A7E-4F73-B94D-528A0371F9A8}.Debug|x64.Build.0 = Debug|Any CPU
+		{C43A5142-7A7E-4F73-B94D-528A0371F9A8}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{C43A5142-7A7E-4F73-B94D-528A0371F9A8}.Debug|x86.Build.0 = Debug|Any CPU
+		{C43A5142-7A7E-4F73-B94D-528A0371F9A8}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C43A5142-7A7E-4F73-B94D-528A0371F9A8}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C43A5142-7A7E-4F73-B94D-528A0371F9A8}.Release|x64.ActiveCfg = Release|Any CPU
+		{C43A5142-7A7E-4F73-B94D-528A0371F9A8}.Release|x64.Build.0 = Release|Any CPU
+		{C43A5142-7A7E-4F73-B94D-528A0371F9A8}.Release|x86.ActiveCfg = Release|Any CPU
+		{C43A5142-7A7E-4F73-B94D-528A0371F9A8}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -97,5 +111,6 @@ Global
 		{A9131180-4C96-4F01-8372-0C7B3F6CDAD8} = {827E0CD3-B72D-47B6-A68D-7590B98EB39B}
 		{D0C25228-987D-4A68-9C20-1D26A10A6D81} = {0AB3BF05-4346-4AA6-1389-037BE0695223}
 		{3D291445-1D9D-4778-822A-E425A7F91BE6} = {0AB3BF05-4346-4AA6-1389-037BE0695223}
+		{C43A5142-7A7E-4F73-B94D-528A0371F9A8} = {0AB3BF05-4346-4AA6-1389-037BE0695223}
 	EndGlobalSection
 EndGlobal

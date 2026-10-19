@@ -284,6 +284,45 @@ public sealed class RoomManager
     }
 
     /// <summary>
+    /// Scade le richieste rimaste senza risposta oltre
+    /// <see cref="KryptaLimits.JoinApprovalTimeoutSeconds"/> secondi (04 §4.1bis).
+    /// Sta qui, e non in un servizio a parte, perché deve girare sotto lo stesso lock di
+    /// <see cref="Approve"/> e <see cref="Reject"/>: una richiesta si evade una volta sola
+    /// (I10), e una scadenza concorrente a un'approvazione non deve poter passare due volte.
+    /// </summary>
+    public IReadOnlyList<ExpiredRequest> ExpirePending()
+    {
+        DateTimeOffset now = _timeProvider.GetUtcNow();
+        TimeSpan timeout = TimeSpan.FromSeconds(KryptaLimits.JoinApprovalTimeoutSeconds);
+        List<ExpiredRequest> expired = [];
+
+        lock (_gate)
+        {
+            foreach (Room room in _rooms.Values)
+            {
+                // room.Pending è una copia immutabile: rimuovere durante il ciclo è sicuro.
+                foreach (JoinRequest request in room.Pending)
+                {
+                    if (now - request.RequestedAt < timeout)
+                    {
+                        continue;
+                    }
+
+                    if (!room.RemovePending(request.RequestId, out _))
+                    {
+                        continue;
+                    }
+
+                    request.Connection.Exit();
+                    expired.Add(new ExpiredRequest(room, request.Connection));
+                }
+            }
+        }
+
+        return expired;
+    }
+
+    /// <summary>
     /// Rinomina la stanza. Il server rivalida sempre l'argomento, anche se il client
     /// lo ha già validato: un client modificato può inviare qualsiasi cosa (07 §9, regola 5).
     /// </summary>

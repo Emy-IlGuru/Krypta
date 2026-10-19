@@ -259,9 +259,22 @@ JoinRequest
    in un canale di testo verso una stanza in cui il mittente non è entrato, ed è la ragione
    per cui [ADR-0010](adr/0010-messaggio-di-richiesta.md) esiste. C'è un test apposta.
 
-Un `BackgroundService` scade le richieste oltre i 120 secondi, con lo stesso percorso di
-un `reject` ma `reason: "timeout"`. Con la richiesta sparisce anche il suo messaggio: non
-resta da nessuna parte, come per i rifiuti (RF-S-A16).
+Un `BackgroundService` (`PendingExpiryService`) scade le richieste oltre i 120 secondi,
+con lo stesso percorso di un `reject` ma `reason: "timeout"`. Con la richiesta sparisce
+anche il suo messaggio: non resta da nessuna parte, come per i rifiuti (RF-S-A16).
+
+**La stanza non vede nessuna riga di sistema.** Alla scadenza i partecipanti ricevono solo
+la coda aggiornata, come per un `cancel`: `join_rejected` dice sempre **chi** ha deciso
+(RF-S-A07) e qui non ha deciso nessuno, e il protocollo non ha un `kind` per la scadenza
+([03 §5.4](03-protocollo.md)). Aggiungerne uno sarebbe una modifica al protocollo, non un
+dettaglio di implementazione.
+
+**Il passo della scansione è di 5 secondi, non di 30 come l'heartbeat.** La scadenza è un
+tempo che l'utente vede scorrere — la schermata [3b] ne fa un conto alla rovescia
+([05 §4bis](05-client-desktop.md)) — e con il passo dell'heartbeat una richiesta potrebbe
+morire a 150 secondi, lasciando il contatore a zero per mezzo minuto. La scansione passa
+comunque dal lock del `RoomManager`, quindi una scadenza concorrente a un'approvazione non
+può evadere due volte la stessa richiesta (I10).
 
 ### 4.2 `NicknameAllocator`
 
@@ -431,9 +444,17 @@ nessun errore**, perché ogni ID libero è valido e produce una stanza nuova. Co
 forma canonica il problema non può proprio presentarsi, e il dizionario può usare
 `StringComparer.Ordinal` senza ambiguità.
 
-Se in futuro servisse un pulsante "stanza casuale", l'ID va generato con
-`RandomNumberGenerator` — non con `Random` — riprovando finché non se ne trova uno libero:
-un ID prevedibile è un ID indovinabile.
+**Il pulsante "Genera" sta nel client, e il server non se ne accorge.** Non è più
+un'ipotesi futura: è RF-C-07b, obbligatorio, in [1A.5](08-roadmap.md). L'ID si genera con
+`RandomNumberGenerator` — mai con `Random` — e il client lo scrive nel campo come se
+l'utente lo avesse digitato.
+
+**Il client non può, e non deve, riprovare finché non trova un ID libero.** Non esiste
+nessun modo di chiedere al server se una stanza esiste, ed è voluto (RF-S-10): un endpoint
+del genere sarebbe un oracolo di esistenza, cioè esattamente ciò che la sala d'attesa e lo
+spazio da 36⁶ servono a negare. La collisione la risolve il `join` stesso — se l'ID è già
+occupato si finisce in sala d'attesa invece di creare la stanza — e con 2,18 miliardi di
+combinazioni è un caso che si nota, non un caso da prevenire.
 
 ## 6. Logging
 

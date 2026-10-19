@@ -499,6 +499,19 @@ Comportamenti richiesti:
   il client mostra un chip/pulsante discreto: `[Rigenera chiave]`. Cliccandoci si apre il dialogo di conferma
   di `/GenerateKey`. Impedisce che la protezione post-uscita resti disattesa perché gli utenti dimenticano
   di digitare il comando a mano.
+
+  **Il chip lo vedono tutti, quindi in più di uno ci cliccheranno.** Escono tre persone di
+  fila e il pulsante compare a ogni partecipante: chi arriva secondo trova la rotazione già
+  fatta. Le due risposte possibili non sono errori e non vanno rese come tali:
+
+  | Cosa arriva | Cosa fa il client |
+  |---|---|
+  | `rekeyed` di qualcun altro | Il chip **sparisce da tutte le righe `user_left`**: la chiave è già nuova, non c'è più niente da rigenerare |
+  | `STALE_KEY_EPOCH` | Silenzio: si rifà il wrapping sull'epoca nuova e si riprova **una volta sola** ([03 §11](03-protocollo.md)) |
+  | `REKEY_RATE_LIMITED` | Riga locale *"La chiave è già stata rigenerata poco fa."* — non "errore": è il risultato giusto, l'ha fatto un altro. Una rotazione ogni 30 s per stanza (RF-S-27b) |
+
+  Renderli come fallimenti sarebbe peggio che non avere il chip: il client avrebbe
+  suggerito un'azione e poi accusato l'utente di averla fatta.
 - **Conferma chiusura finestra (`Window.Closing`)** → se l'utente tenta di chiudere la finestra (`Alt+F4`,
   pulsante `X` dell'OS) mentre si trova nella stanza attiva ([4]) o in attesa ([3b]), il client intercetta
   l'evento e mostra un dialogo modale di conferma:
@@ -705,18 +718,32 @@ public RoomViewModel() { JoinCommand = ReactiveCommand.Create(Join); }
 | Proprietà notificate | `this.RaiseAndSetIfChanged(ref _Campo, value)` |
 | Campi privati di supporto | `_PascalCase` con underscore iniziale — **non** `_camelCase` |
 | Comandi | `ReactiveCommand<Unit, Unit>`, o `<string, Unit>` se prendono un parametro |
-| Navigazione | `IScreen` + `IRoutableViewModel` con `UrlPathSegment`, e `RoutedViewHost` nella finestra |
+| Navigazione | `IScreen` + `IRoutableViewModel` con `UrlPathSegment`; nella finestra un `ContentControl` legato a `CurrentViewModel` — **non** `RoutedViewHost`, vedi l'avvertenza qui sotto |
 | Ciclo di vita | `IActivatableViewModel` con `ViewModelActivator`, e un `CompositeDisposable` che libera le sottoscrizioni |
 | View ↔ ViewModel | `ViewLocator : IDataTemplate`, per convenzione di nome: `…ViewModel` → `…View` |
 | Binding | `AvaloniaUseCompiledBindingsByDefault` a `true` nel `.csproj` |
 | Avvio | `AppBuilder.Configure<App>().UsePlatformDetect().UseReactiveUI()` |
 
-**Due avvertenze pratiche**, entrambe verificate su `net10.0` il 2026-09-08:
+**Tre avvertenze pratiche**, tutte verificate su `net10.0` l'8 settembre 2026:
 
 - `public IScreen? HostScreen { get; }` produce il warning **CS8766** con `<Nullable>enable</Nullable>`,
   perché `IRoutableViewModel` dichiara `HostScreen` non annullabile. È innocuo e presente
   anche in ETG MCA. Va deciso una volta: o si dichiara `IScreen HostScreen` senza `?`, o
   si accetta il warning — l'importante è non lasciarlo comparire a caso in metà dei file.
+- **`RoutedViewHost` e `ViewLocator : IDataTemplate` non convivono**, ed è la trappola che
+  ha prodotto una finestra bianca il 2026-09-08. `RoutedViewHost` non guarda le
+  `Application.DataTemplates`: risolve le view con l'`IViewLocator` di ReactiveUI, che
+  cerca in Splat un `IViewFor<TViewModel>` registrato. Una `UserControl` normale non lo
+  implementa, quindi la risoluzione **fallisce in silenzio** — nessuna eccezione, solo un
+  `DefaultContent` nullo. O si tengono le view come `UserControl` e si naviga con un
+  `ContentControl` legato a `CurrentViewModel` (la scelta di [1A.4](08-roadmap.md), perché
+  aggiungere una schermata non richiede di ricordarsi una registrazione), oppure ogni view
+  implementa `IViewFor<T>` e si registra in Splat, e allora il `ViewLocator` va cancellato.
+  Quello che non si può fare è scrivere entrambi e aspettarsi che uno dei due vinca.
+
+  `RoutingState.CurrentViewModel` è un `IObservable`, non una proprietà: serve un
+  `ToProperty` nel `MainWindowViewModel`, costruito **prima** della prima navigazione.
+
 - Le sottoscrizioni fatte in `WhenActivated` vanno aggiunte al `CompositeDisposable`.
   Nella schermata [4] ce ne sono diverse (contatore partecipanti, coda d'attesa, conto
   alla rovescia), e non liberarle tiene in vita il ViewModel dopo un `leave`.
@@ -746,10 +773,11 @@ messaggio di sistema, messaggio locale (errori di comando). Un solo `DataTemplat
 selettore, così l'ordine cronologico è garantito da una sola collezione.
 
 `KryptaConnection` è l'unico punto che tocca il WebSocket. Espone eventi
-(`MessageReceived`, `SystemReceived`, `ClearReceived`, `ParticipantsChanged`,
-`RoomRenamed`, `PendingStarted`, `WaitingChanged`, `Rejected`, `Disconnected`,
-`ErrorReceived`) e metodi (`ConnectAsync`, `JoinAsync`, `ApproveAsync`, `RejectAsync`,
-`CancelAsync`, `SendMessageAsync`, `SendCommandAsync`, `LeaveAsync`, `DisconnectAsync`).
+(`Joined`, `MessageReceived`, `SystemReceived`, `ClearReceived`, `ParticipantsChanged`,
+`RoomRenamed`, `PendingStarted`, `WaitingChanged`, `Rejected`, `Left`, `RosterChanged`,
+`Rekeyed`, `Disconnected`, `ErrorReceived`) e metodi (`ConnectAsync`, `JoinAsync`,
+`ApproveAsync`, `RejectAsync`, `CancelAsync`, `SendMessageAsync`, `SendCommandAsync`,
+`RekeyAsync`, `LeaveAsync`, `DisconnectAsync`).
 
 **Regola:** tutti gli eventi vengono marshalati sul thread UI con `Dispatcher.UIThread`
 prima di toccare la `ObservableCollection`. È l'errore più comune in Avalonia e produce

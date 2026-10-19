@@ -1,9 +1,18 @@
+using Avalonia;
+using Avalonia.ReactiveUI;
+
 namespace Krypta.Client;
 
 internal static class Program
 {
-    // L'avvio Avalonia viene aggiunto nel punto 1A.4.
-    public static void Main()
-    {
-    }
+    [STAThread]
+    public static void Main(string[] args) =>
+        BuildAvaloniaApp().StartWithClassicDesktopLifetime(args);
+
+    public static AppBuilder BuildAvaloniaApp() =>
+        AppBuilder.Configure<App>()
+            .UsePlatformDetect()
+            .WithInterFont()
+            .LogToTrace()
+            .UseReactiveUI();
 }

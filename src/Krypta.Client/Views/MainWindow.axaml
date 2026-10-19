@@ -1,0 +1,16 @@
+<Window
+    x:Class="Krypta.Client.Views.MainWindow"
+    x:DataType="vm:MainWindowViewModel"
+    xmlns="https://github.com/avaloniaui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:vm="using:Krypta.Client.ViewModels"
+    Title="Krypta"
+    Width="960"
+    Height="680"
+    MinWidth="720"
+    MinHeight="520">
+
+  <!-- La schermata corrente del Router. Il ViewLocator di App.axaml risolve
+       il ViewModel nella View per convenzione di nome. -->
+  <ContentControl Content="{Binding CurrentViewModel}" />
+</Window>

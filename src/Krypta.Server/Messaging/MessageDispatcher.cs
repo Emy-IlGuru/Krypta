@@ -144,6 +144,33 @@ public sealed class MessageDispatcher(
         }
     }
 
+    /// <summary>
+    /// Chiude le richieste rimaste senza risposta oltre i 120 secondi (04 §4.1bis).
+    /// Il richiedente riceve lo stesso `rejected` di un rifiuto, con `reason: "timeout"`,
+    /// e la stanza vede solo la coda aggiornata: nessuna riga di sistema, perché
+    /// `join_rejected` dice sempre **chi** ha deciso (RF-S-A07) e qui non ha deciso
+    /// nessuno. È lo stesso trattamento di un `cancel`.
+    /// </summary>
+    /// <returns>Quante richieste sono scadute, per il solo log.</returns>
+    public int ExpirePendingRequests()
+    {
+        IReadOnlyList<ExpiredRequest> expired = roomManager.ExpirePending();
+        foreach (ExpiredRequest request in expired)
+        {
+            sender.Send(request.Requester, new RejectedServerMessage(
+                request.Room.Id,
+                RejectionReasons.Timeout));
+        }
+
+        // Una sola coda aggiornata per stanza, anche se sono scadute più richieste insieme.
+        foreach (Room room in expired.Select(request => request.Room).Distinct())
+        {
+            BroadcastWaiting(room);
+        }
+
+        return expired.Count;
+    }
+
     private void DispatchJoin(Participant participant, JoinClientMessage message)
     {
         JoinResult result = roomManager.Join(

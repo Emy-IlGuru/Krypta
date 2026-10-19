@@ -1,0 +1,14 @@
+<UserControl
+    x:Class="Krypta.Client.Views.ConnectionView"
+    x:DataType="vm:ConnectionViewModel"
+    xmlns="https://github.com/avaloniaui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:vm="using:Krypta.Client.ViewModels">
+
+  <Grid Margin="32">
+    <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" Spacing="8">
+      <TextBlock FontSize="30" FontWeight="SemiBold" Text="Krypta" />
+      <TextBlock Opacity="0.7" Text="Infrastruttura client pronta" />
+    </StackPanel>
+  </Grid>
+</UserControl>

@@ -99,3 +99,10 @@ public sealed record LeaveResult(
     internal static LeaveResult Error(string errorCode) =>
         new(false, ErrorCode: errorCode);
 }
+
+/// <summary>
+/// Richiesta scaduta senza risposta. Quando arriva qui il richiedente è già stato tolto
+/// dalla coda e dallo stato di attesa: resta soltanto da avvisarlo e da aggiornare la
+/// coda vista dalla stanza.
+/// </summary>
+public sealed record ExpiredRequest(Room Room, Participant Requester);

@@ -18,6 +18,7 @@ builder.Services.AddSingleton<JoinRateLimiter>();
 builder.Services.AddSingleton<MessageDispatcher>();
 builder.Services.AddSingleton<ConnectionHandler>();
 builder.Services.AddHostedService<HeartbeatService>();
+builder.Services.AddHostedService<PendingExpiryService>();
 
 WebApplication app = builder.Build();
 

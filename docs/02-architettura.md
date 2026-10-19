@@ -99,11 +99,14 @@ Krypta/
 │   │
 │   └── Krypta.Client/
 │       ├── App.axaml
-│       ├── Views/              ConnectionView, AccountView, RoomView, ChatView
-│       ├── ViewModels/         un ViewModel per View + MainWindowViewModel
+│       ├── Views/              MainWindow e le View delle cinque schermate
+│       ├── ViewModels/         un ViewModel per View + MainWindowViewModel/Router
+│       ├── Configuration/
+│       │   └── ClientConfig.cs      Modello validato di krypta.config.xml
 │       ├── Services/
 │       │   ├── KryptaConnection.cs   Client WebSocket, invio/ricezione
 │       │   ├── ConfigService.cs      Lettura/scrittura krypta.config.xml
+│       │   ├── IUiDispatcher.cs      Unico confine per il marshaling sul thread UI
 │       │   ├── NicknameColors.cs     Colore deterministico dal nickname
 │       │   ├── SessionKeys.cs        Coppia effimera ECDH, mai su disco
 │       │   ├── RoomCrypto.cs         Chiave di stanza, wrap/unwrap, AES-GCM
@@ -112,7 +115,8 @@ Krypta/
 │
 └── tests/
     ├── Krypta.Server.Tests/    RoomManager, limiti, ciclo di vita stanze
-    └── Krypta.Protocol.Tests/  Serializzazione dei messaggi, round-trip
+    ├── Krypta.Protocol.Tests/  Serializzazione dei messaggi, round-trip
+    └── Krypta.Client.Tests/    Configurazione, trasporto WebSocket e confine UI
 ```
 
 **`Krypta.Shared` è il punto chiave**: i tipi del protocollo sono definiti una volta sola
