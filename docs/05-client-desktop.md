@@ -56,6 +56,7 @@ aperto e si cambia stanza senza riconnettersi.
 |   +------------------------------------------+   |
 |                                                  |
 |   [ ] Ricorda queste impostazioni                |
+|   [ ] Connessione in chiaro (solo 127.0.0.1)     |
 |                                                  |
 |                              +---------------+   |
 |                              |   Connetti    |   |
@@ -69,11 +70,19 @@ aperto e si cambia stanza senza riconnettersi.
 |---|---|
 | Indirizzo server | Precompilato da `krypta.config.xml`. IPv4, IPv6 o hostname |
 | Porta | Precompilata da config. Solo cifre, 1–65535 |
-| Ricorda | Se spuntata, al connect riuscito riscrive host e porta nel file di config |
+| Ricorda | Se spuntata, al connect riuscito riscrive host, porta e cifratura nel file di config |
+| Connessione in chiaro | Spunta di sviluppo: `ws://` invece di `wss://`. **Attivabile solo con host `127.0.0.1`**; su qualsiasi altro host si spegne da sola e resta disabilitata, perché il trasporto la rifiuterebbe comunque. Finché la fase 1B non è fatta è l'**unico** modo di collegarsi al server, che non espone alcun endpoint TLS |
+| Avviso di connessione non cifrata | Compare **sempre** quando la spunta è attiva, e non è nascondibile (§5bis) |
 | Connetti | Disabilitato se i campi non sono validi. Durante il tentativo mostra "Connessione in corso…" e si disabilita |
-| Stato | Verde: connesso. Rosso: errore con il motivo (host irraggiungibile / porta chiusa / timeout / sotto-protocollo rifiutato) |
+| Stato | Verde: connesso. Rosso: errore con il motivo (host irraggiungibile / porta chiusa / timeout / sotto-protocollo rifiutato / **handshake TLS fallito**) |
 
 **Timeout di connessione:** 5 secondi.
+
+**Handshake TLS fallito.** Un server che parla in chiaro e riceve un `ClientHello`
+risponde con qualcosa che non è un record TLS, e la libreria lo riporta come errore di
+sincronizzazione. È il caso normale in fase 1A, dove il server **non espone TLS**: il
+messaggio deve dirlo e rimandare alla spunta, non a "verifica host e porta", che sono
+invece corretti.
 
 ---
 
@@ -108,7 +117,7 @@ aperto e si cambia stanza senza riconnettersi.
 | Nickname | Precompilato dal config. Validato lato client: 3–25 caratteri, caratteri ammessi, **nomi riservati esclusi** (§4.1.1 del protocollo) |
 | Anteprima colore | Il nickname è mostrato già colorato con il colore che avrà in chat |
 | Avvertenza | La riga sul numero automatico va mostrata sempre, non solo dopo che è successo: evita che l'utente si sorprenda di chiamarsi `emy2` |
-| Avanti | Disabilitato finché il nickname non è valido. Non contatta il server |
+| Avanti | Disabilitato finché il nickname non è valido. **Non contatta il server**: salva il nickname digitato nel config, se le due condizioni di [06 §5](06-configurazione.md) sono soddisfatte, e passa a [3] |
 | Disconnetti | Chiude il socket e torna a [1] |
 
 **Nota:** il nickname digitato qui è una *richiesta*. Quello effettivo arriva dal server

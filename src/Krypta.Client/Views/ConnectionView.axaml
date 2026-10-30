@@ -5,10 +5,169 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:vm="using:Krypta.Client.ViewModels">
 
-  <Grid Margin="32">
-    <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" Spacing="8">
-      <TextBlock FontSize="30" FontWeight="SemiBold" Text="Krypta" />
-      <TextBlock Opacity="0.7" Text="Infrastruttura client pronta" />
-    </StackPanel>
+  <Grid Background="{DynamicResource KryptaBackgroundBrush}">
+    <Border
+        MaxWidth="500"
+        Margin="24"
+        Padding="54,44"
+        HorizontalAlignment="Center"
+        VerticalAlignment="Center"
+        Background="{DynamicResource KryptaSurfaceBrush}"
+        BorderBrush="{DynamicResource KryptaLineBrush}"
+        BorderThickness="1"
+        CornerRadius="11">
+
+      <StackPanel Width="344">
+        <TextBlock
+            HorizontalAlignment="Center"
+            FontFamily="Cascadia Mono,Consolas"
+            FontSize="21"
+            FontWeight="Bold"
+            Foreground="{DynamicResource KryptaInkBrush}"
+            Text="K R Y P T A" />
+        <TextBlock
+            Margin="0,7,0,30"
+            HorizontalAlignment="Center"
+            FontSize="12.5"
+            Foreground="{DynamicResource KryptaMutedBrush}"
+            Text="Entri, parli, esci. Non resta niente." />
+
+        <TextBlock
+            Margin="0,0,0,6"
+            FontSize="12.5"
+            FontWeight="Medium"
+            Foreground="{DynamicResource KryptaSecondaryInkBrush}"
+            Text="Indirizzo server" />
+        <TextBox
+            x:Name="HostTextBox"
+            Padding="12,10"
+            Background="{DynamicResource KryptaBackgroundBrush}"
+            BorderBrush="{DynamicResource KryptaLineBrush}"
+            CornerRadius="7"
+            FontFamily="Cascadia Mono,Consolas"
+            IsEnabled="{Binding CanEdit}"
+            Text="{Binding Host, Mode=TwoWay}"
+            Watermark="127.0.0.1" />
+
+        <TextBlock
+            Margin="0,18,0,6"
+            FontSize="12.5"
+            FontWeight="Medium"
+            Foreground="{DynamicResource KryptaSecondaryInkBrush}"
+            Text="Porta" />
+        <TextBox
+            x:Name="PortTextBox"
+            MaxLength="5"
+            Padding="12,10"
+            Background="{DynamicResource KryptaBackgroundBrush}"
+            BorderBrush="{DynamicResource KryptaLineBrush}"
+            CornerRadius="7"
+            FontFamily="Cascadia Mono,Consolas"
+            IsEnabled="{Binding CanEdit}"
+            Text="{Binding Port, Mode=TwoWay}"
+            Watermark="5000" />
+
+        <CheckBox
+            Margin="0,18,0,0"
+            Content="Ricorda queste impostazioni"
+            Foreground="{DynamicResource KryptaSecondaryInkBrush}"
+            IsChecked="{Binding Remember, Mode=TwoWay}"
+            IsEnabled="{Binding CanEdit}" />
+
+        <CheckBox
+            Margin="0,8,0,0"
+            Content="Connessione in chiaro (solo 127.0.0.1)"
+            Foreground="{DynamicResource KryptaSecondaryInkBrush}"
+            IsChecked="{Binding UseCleartext, Mode=TwoWay}"
+            IsEnabled="{Binding CanToggleCleartext}" />
+
+        <!-- Avviso permanente e non nascondibile: finché la fase 1B non è completa è
+             l'unica cosa che impedisce di usare Krypta credendolo cifrato (05 §5bis). -->
+        <Border
+            Margin="0,12,0,0"
+            Padding="12,9"
+            Background="{DynamicResource KryptaRaisedBrush}"
+            BorderBrush="{DynamicResource KryptaWarningBrush}"
+            BorderThickness="1"
+            CornerRadius="7"
+            IsVisible="{Binding ShowCleartextWarning}">
+          <TextBlock
+              FontSize="12"
+              Foreground="{DynamicResource KryptaWarningBrush}"
+              Text="Connessione non cifrata: chi è sulla rete legge tutto. Ammessa solo verso 127.0.0.1, per lo sviluppo."
+              TextWrapping="Wrap" />
+        </Border>
+
+        <Grid Margin="0,26,0,0" RowDefinitions="Auto,Auto" RowSpacing="14">
+          <Grid MinHeight="36" VerticalAlignment="Center">
+            <Grid
+                ColumnDefinitions="Auto,*"
+                ColumnSpacing="7"
+                VerticalAlignment="Center"
+                IsVisible="{Binding IsStatusInProgress}">
+              <TextBlock Foreground="{DynamicResource KryptaAccentBrush}" Text="●" />
+              <TextBlock
+                  Grid.Column="1"
+                  FontSize="12.5"
+                  Foreground="{DynamicResource KryptaAccentBrush}"
+                  Text="{Binding StatusMessage}"
+                  TextWrapping="Wrap" />
+            </Grid>
+            <Grid
+                ColumnDefinitions="Auto,*"
+                ColumnSpacing="7"
+                VerticalAlignment="Center"
+                IsVisible="{Binding IsStatusSuccess}">
+              <TextBlock Foreground="{DynamicResource KryptaSuccessBrush}" Text="●" />
+              <TextBlock
+                  Grid.Column="1"
+                  FontSize="12.5"
+                  Foreground="{DynamicResource KryptaSuccessBrush}"
+                  Text="{Binding StatusMessage}"
+                  TextWrapping="Wrap" />
+            </Grid>
+            <Grid
+                ColumnDefinitions="Auto,*"
+                ColumnSpacing="7"
+                VerticalAlignment="Center"
+                IsVisible="{Binding IsStatusWarning}">
+              <TextBlock Foreground="{DynamicResource KryptaWarningBrush}" Text="●" />
+              <TextBlock
+                  Grid.Column="1"
+                  FontSize="12.5"
+                  Foreground="{DynamicResource KryptaWarningBrush}"
+                  Text="{Binding StatusMessage}"
+                  TextWrapping="Wrap" />
+            </Grid>
+            <Grid
+                ColumnDefinitions="Auto,*"
+                ColumnSpacing="7"
+                VerticalAlignment="Center"
+                IsVisible="{Binding IsStatusError}">
+              <TextBlock Foreground="{DynamicResource KryptaDangerBrush}" Text="●" />
+              <TextBlock
+                  Grid.Column="1"
+                  FontSize="12.5"
+                  Foreground="{DynamicResource KryptaDangerBrush}"
+                  Text="{Binding StatusMessage}"
+                  TextWrapping="Wrap" />
+            </Grid>
+          </Grid>
+
+          <Button
+              Grid.Row="1"
+              MinWidth="112"
+              Padding="20,11"
+              HorizontalAlignment="Right"
+              HorizontalContentAlignment="Center"
+              Background="{DynamicResource KryptaInkBrush}"
+              Command="{Binding ConnectCommand}"
+              Content="{Binding ConnectButtonText}"
+              Foreground="{DynamicResource KryptaSurfaceBrush}"
+              IsDefault="True"
+              IsEnabled="{Binding CanConnect}" />
+        </Grid>
+      </StackPanel>
+    </Border>
   </Grid>
 </UserControl>

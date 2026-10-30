@@ -19,16 +19,29 @@ internal sealed class FakeWebSocketTransport : IWebSocketTransport
 
     public Uri? ConnectedUri { get; private set; }
 
+    public Exception? ConnectException { get; set; }
+
+    public TaskCompletionSource? ConnectGate { get; set; }
+
     public ConcurrentQueue<string> SentMessages { get; } = new();
 
     public void AddSubProtocol(string subProtocol) => _RequestedSubProtocol = subProtocol;
 
-    public ValueTask ConnectAsync(Uri uri, CancellationToken cancellationToken)
+    public async ValueTask ConnectAsync(Uri uri, CancellationToken cancellationToken)
     {
         ConnectedUri = uri;
+        if (ConnectException is not null)
+        {
+            throw ConnectException;
+        }
+
+        if (ConnectGate is not null)
+        {
+            await ConnectGate.Task.WaitAsync(cancellationToken);
+        }
+
         SubProtocol = _RequestedSubProtocol;
         State = WebSocketState.Open;
-        return ValueTask.CompletedTask;
     }
 
     public async ValueTask<ClientReceiveResult> ReceiveAsync(

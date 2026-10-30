@@ -84,7 +84,9 @@ Il client riscrive `krypta.config.xml` **solo** quando:
 - l'utente ha spuntato "Ricorda queste impostazioni" nella schermata [1], **e**
 - la connessione è andata a buon fine.
 
-In quel caso vengono aggiornati **solo** `Server/Host`, `Server/Port` e `User/Nickname`.
+In quel caso vengono aggiornati **solo** `Server/Host`, `Server/Port`, `Server/UseTls` e
+`User/Nickname`. `UseTls` è nell'elenco perché la schermata [1] lo espone come spunta: una
+preferenza che l'utente imposta e che il file non conserva sarebbe da rimettere a ogni avvio.
 
 Il nickname salvato è **quello digitato dall'utente**, non quello eventualmente
 disambiguato dal server: non ha senso ritrovarsi `emy2` precompilato al prossimo avvio,

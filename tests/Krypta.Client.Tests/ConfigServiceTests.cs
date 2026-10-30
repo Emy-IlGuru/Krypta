@@ -110,6 +110,7 @@ public sealed class ConfigServiceTests
             loaded,
             "chat.example",
             7443,
+            useTls: true,
             "  emy  ",
             rememberRequested: true);
         ConfigLoadResult reloaded = await service.LoadAsync();
@@ -120,6 +121,28 @@ public sealed class ConfigServiceTests
         Assert.Equal("emy", reloaded.Config.User.Nickname);
         byte[] bytes = await File.ReadAllBytesAsync(temporary.ConfigPath);
         Assert.False(bytes.AsSpan().StartsWith(new byte[] { 0xEF, 0xBB, 0xBF }));
+    }
+
+    [Fact]
+    public async Task SaveServerSettings_SenzaNickname_AggiornaSoloHostEPorta()
+    {
+        using TemporaryDirectory temporary = new();
+        ConfigService service = new(temporary.ConfigPath);
+        ConfigLoadResult loaded = await service.LoadAsync();
+
+        ConfigSaveResult saved = await service.SaveServerSettingsAsync(
+            loaded,
+            "chat.example",
+            7443,
+            useTls: true,
+            rememberRequested: true);
+        ConfigLoadResult reloaded = await service.LoadAsync();
+
+        Assert.True(saved.Saved);
+        Assert.Equal("chat.example", reloaded.Config.Server.Host);
+        Assert.Equal(7443, reloaded.Config.Server.Port);
+        Assert.Equal(string.Empty, reloaded.Config.User.Nickname);
+        Assert.True(reloaded.Config.Server.UseTls);
     }
 
     [Fact]
@@ -144,6 +167,7 @@ public sealed class ConfigServiceTests
             loaded,
             "127.0.0.1",
             6000,
+            useTls: false,
             "new",
             rememberRequested: true);
         ConfigLoadResult reloaded = await service.LoadAsync();
@@ -187,6 +211,7 @@ public sealed class ConfigServiceTests
             new ConfigLoadResult(config),
             "chat.example",
             5000,
+            useTls: true,
             "emy",
             userRequestedRemembering);
 
@@ -207,6 +232,7 @@ public sealed class ConfigServiceTests
             loaded,
             "chat.example",
             5000,
+            useTls: true,
             "emy",
             rememberRequested: true);
 
@@ -234,6 +260,7 @@ public sealed class ConfigServiceTests
             loaded,
             "chat.example",
             5000,
+            useTls: true,
             "emy",
             rememberRequested: true);
 

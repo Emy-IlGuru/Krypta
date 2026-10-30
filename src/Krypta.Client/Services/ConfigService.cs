@@ -21,10 +21,6 @@ public sealed partial class ConfigService
     public const string UnsafeOverwriteWarning =
         "La configurazione non leggibile non è stata sovrascritta automaticamente.";
 
-    private static readonly HashSet<string> ReservedNicknames = new(
-        ["STANZA", "KRYPTA", "SISTEMA", "SYSTEM", "SERVER", "ROOM"],
-        StringComparer.OrdinalIgnoreCase);
-
     public ConfigService(string? configPath = null)
     {
         ConfigPath = configPath ?? Path.Combine(AppContext.BaseDirectory, FileName);
@@ -82,12 +78,78 @@ public sealed partial class ConfigService
         ConfigLoadResult loaded,
         string host,
         int port,
+        bool useTls,
         string nickname,
         bool rememberRequested,
         CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(loaded);
 
+        ConfigSaveResult? guardResult = ValidateSaveRequest(
+            loaded,
+            host,
+            port,
+            useTls,
+            rememberRequested);
+        if (guardResult is not null)
+        {
+            return guardResult;
+        }
+
+        if (!TryNormalizeNickname(nickname, out string normalizedNickname))
+        {
+            return new ConfigSaveResult(Saved: false, Warning: SaveFailedWarning);
+        }
+
+        ClientConfig updated = loaded.Config with
+        {
+            Server = loaded.Config.Server with { Host = host, Port = port, UseTls = useTls },
+            User = loaded.Config.User with { Nickname = normalizedNickname },
+        };
+
+        return await SaveAsync(updated, cancellationToken);
+    }
+
+    public async Task<ConfigSaveResult> SaveServerSettingsAsync(
+        ConfigLoadResult loaded,
+        string host,
+        int port,
+        bool useTls,
+        bool rememberRequested,
+        CancellationToken cancellationToken = default)
+    {
+        ArgumentNullException.ThrowIfNull(loaded);
+
+        ConfigSaveResult? guardResult = ValidateSaveRequest(
+            loaded,
+            host,
+            port,
+            useTls,
+            rememberRequested);
+        if (guardResult is not null)
+        {
+            return guardResult;
+        }
+
+        ClientConfig updated = loaded.Config with
+        {
+            Server = loaded.Config.Server with { Host = host, Port = port, UseTls = useTls },
+        };
+
+        return await SaveAsync(updated, cancellationToken);
+    }
+
+    /// <summary>
+    /// Il vincolo si applica a ciò che si sta <b>per scrivere</b>, non a ciò che c'era nel
+    /// file: la schermata [1] può cambiare sia l'host sia la cifratura nello stesso giro.
+    /// </summary>
+    private static ConfigSaveResult? ValidateSaveRequest(
+        ConfigLoadResult loaded,
+        string host,
+        int port,
+        bool useTls,
+        bool rememberRequested)
+    {
         if (!loaded.Config.Ui.RememberSettings || !rememberRequested)
         {
             return new ConfigSaveResult(Saved: false, Skipped: true);
@@ -98,21 +160,11 @@ public sealed partial class ConfigService
             return new ConfigSaveResult(Saved: false, Warning: UnsafeOverwriteWarning);
         }
 
-        if (!IsValidHost(host)
+        return !IsValidHost(host)
             || port is < 1 or > 65535
-            || (!loaded.Config.Server.UseTls && !IsCleartextLoopback(host))
-            || !TryNormalizeNickname(nickname, out string normalizedNickname))
-        {
-            return new ConfigSaveResult(Saved: false, Warning: SaveFailedWarning);
-        }
-
-        ClientConfig updated = loaded.Config with
-        {
-            Server = loaded.Config.Server with { Host = host, Port = port },
-            User = loaded.Config.User with { Nickname = normalizedNickname },
-        };
-
-        return await SaveAsync(updated, cancellationToken);
+            || (!useTls && !IsCleartextLoopback(host))
+                ? new ConfigSaveResult(Saved: false, Warning: SaveFailedWarning)
+                : null;
     }
 
     private static ConfigLoadResult Parse(XDocument document)
@@ -319,42 +371,17 @@ public sealed partial class ConfigService
         && Uri.CheckHostName(value) is not UriHostNameType.Unknown;
 
     private static bool IsCleartextLoopback(string host) =>
-        string.Equals(host, "127.0.0.1", StringComparison.Ordinal);
+        CleartextPolicy.AllowsCleartext(host);
 
+    /// <summary>
+    /// Le regole stanno in <see cref="NicknameRules"/>, condivise col server: due copie
+    /// che divergono darebbero un campo che il client accetta e il server rifiuta.
+    /// </summary>
     private static bool TryNormalizeNickname(string? value, out string normalized)
     {
-        normalized = value?.Trim() ?? string.Empty;
-        if (normalized.Length is < KryptaLimits.NicknameMinLength
-            or > KryptaLimits.NicknameMaxLength
-            || ReservedNicknames.Contains(normalized))
-        {
-            return false;
-        }
-
-        bool previousWasSpace = false;
-        foreach (char character in normalized)
-        {
-            bool isAsciiToken = character is >= 'A' and <= 'Z'
-                or >= 'a' and <= 'z'
-                or >= '0' and <= '9'
-                or '_'
-                or '.'
-                or '-';
-            if (isAsciiToken)
-            {
-                previousWasSpace = false;
-                continue;
-            }
-
-            if (character != ' ' || previousWasSpace)
-            {
-                return false;
-            }
-
-            previousWasSpace = true;
-        }
-
-        return true;
+        bool valid = NicknameRules.TryNormalize(value, out string? candidate);
+        normalized = candidate ?? string.Empty;
+        return valid;
     }
 
     private static T ReadValid<T>(T? value, Func<T?, bool> predicate, T fallback)

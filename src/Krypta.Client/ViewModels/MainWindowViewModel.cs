@@ -8,7 +8,9 @@ public sealed class MainWindowViewModel : ViewModelBase, IScreen
 {
     private readonly ObservableAsPropertyHelper<IRoutableViewModel?> _CurrentViewModel;
 
-    public MainWindowViewModel(KryptaConnection connection)
+    public MainWindowViewModel(
+        KryptaConnection connection,
+        ConfigService? configService = null)
     {
         Connection = connection;
 
@@ -18,7 +20,10 @@ public sealed class MainWindowViewModel : ViewModelBase, IScreen
         _CurrentViewModel = Router.CurrentViewModel
             .ToProperty(this, viewModel => viewModel.CurrentViewModel);
 
-        Router.Navigate.Execute(new ConnectionViewModel(this)).Subscribe();
+        Router.Navigate.Execute(new ConnectionViewModel(
+            this,
+            connection,
+            configService ?? new ConfigService())).Subscribe();
     }
 
     public RoutingState Router { get; } = new();

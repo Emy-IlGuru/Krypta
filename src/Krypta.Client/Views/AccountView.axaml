@@ -1,0 +1,135 @@
+<UserControl
+    x:Class="Krypta.Client.Views.AccountView"
+    x:DataType="vm:AccountViewModel"
+    xmlns="https://github.com/avaloniaui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:vm="using:Krypta.Client.ViewModels">
+
+  <Grid Background="{DynamicResource KryptaBackgroundBrush}">
+    <Border
+        MaxWidth="500"
+        Margin="24"
+        Padding="54,40"
+        HorizontalAlignment="Center"
+        VerticalAlignment="Center"
+        Background="{DynamicResource KryptaSurfaceBrush}"
+        BorderBrush="{DynamicResource KryptaLineBrush}"
+        BorderThickness="1"
+        CornerRadius="11">
+
+      <StackPanel Width="344">
+        <Grid ColumnDefinitions="*,Auto" VerticalAlignment="Center">
+          <TextBlock
+              VerticalAlignment="Center"
+              FontSize="12.5"
+              Foreground="{DynamicResource KryptaMutedBrush}"
+              Text="{Binding ServerLabel, StringFormat='Connesso a {0}'}"
+              TextTrimming="CharacterEllipsis" />
+          <Button
+              Grid.Column="1"
+              Padding="12,6"
+              Background="Transparent"
+              BorderBrush="{DynamicResource KryptaLineBrush}"
+              BorderThickness="1"
+              Command="{Binding DisconnectCommand}"
+              Content="Disconnetti"
+              CornerRadius="7"
+              FontSize="12"
+              Foreground="{DynamicResource KryptaSecondaryInkBrush}" />
+        </Grid>
+
+        <TextBlock
+            Margin="0,30,0,6"
+            FontSize="15"
+            FontWeight="SemiBold"
+            Foreground="{DynamicResource KryptaInkBrush}"
+            Text="Come vuoi farti chiamare?" />
+
+        <TextBox
+            x:Name="NicknameTextBox"
+            MaxLength="25"
+            Padding="12,10"
+            Background="{DynamicResource KryptaBackgroundBrush}"
+            BorderBrush="{DynamicResource KryptaLineBrush}"
+            CornerRadius="7"
+            FontFamily="Cascadia Mono,Consolas"
+            Text="{Binding Nickname, Mode=TwoWay}"
+            Watermark="emy" />
+
+        <TextBlock
+            Margin="0,7,0,0"
+            FontSize="12"
+            Foreground="{DynamicResource KryptaMutedBrush}"
+            Text="Da 3 a 25 caratteri." />
+        <TextBlock
+            Margin="0,4,0,0"
+            FontSize="12"
+            Foreground="{DynamicResource KryptaDangerBrush}"
+            IsVisible="{Binding HasValidationMessage}"
+            Text="{Binding ValidationMessage}"
+            TextWrapping="Wrap" />
+
+        <!-- Anteprima: la stessa riga a due trattini che comparirà in chat, già col
+             colore che il nickname avrà lì. -->
+        <Border
+            Margin="0,20,0,0"
+            Padding="14,11"
+            Background="{DynamicResource KryptaRaisedBrush}"
+            CornerRadius="7">
+          <StackPanel Orientation="Horizontal" Spacing="6">
+            <TextBlock
+                FontFamily="Cascadia Mono,Consolas"
+                FontSize="12.5"
+                Foreground="{DynamicResource KryptaMutedBrush}"
+                Text="--" />
+            <TextBlock
+                FontFamily="Cascadia Mono,Consolas"
+                FontSize="12.5"
+                FontWeight="SemiBold"
+                Foreground="{Binding NicknameBrush}"
+                Text="{Binding NicknamePreview}" />
+            <TextBlock
+                FontFamily="Cascadia Mono,Consolas"
+                FontSize="12.5"
+                Foreground="{DynamicResource KryptaMutedBrush}"
+                Text="---" />
+          </StackPanel>
+        </Border>
+
+        <TextBlock
+            Margin="0,18,0,0"
+            FontSize="12"
+            Foreground="{DynamicResource KryptaSecondaryInkBrush}"
+            Text="Se il nome è già in uso nella stanza, verrà aggiunto un numero (es. emy2)."
+            TextWrapping="Wrap" />
+        <TextBlock
+            Margin="0,8,0,0"
+            FontSize="12"
+            Foreground="{DynamicResource KryptaMutedBrush}"
+            Text="Il nickname vale solo per questa sessione. Nessuna password, nessun account."
+            TextWrapping="Wrap" />
+
+        <TextBlock
+            Margin="0,14,0,0"
+            FontSize="12"
+            Foreground="{DynamicResource KryptaWarningBrush}"
+            IsVisible="{Binding HasStatus}"
+            Text="{Binding StatusMessage}"
+            TextWrapping="Wrap" />
+
+        <Button
+            Margin="0,26,0,0"
+            MinWidth="112"
+            Padding="20,11"
+            HorizontalAlignment="Right"
+            HorizontalContentAlignment="Center"
+            Background="{DynamicResource KryptaInkBrush}"
+            Command="{Binding ContinueCommand}"
+            Content="Avanti"
+            Foreground="{DynamicResource KryptaSurfaceBrush}"
+            IsDefault="True"
+            IsEnabled="{Binding CanContinue}" />
+      </StackPanel>
+    </Border>
+  </Grid>
+</UserControl>

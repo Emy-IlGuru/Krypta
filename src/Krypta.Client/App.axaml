@@ -3,7 +3,40 @@
     xmlns="https://github.com/avaloniaui"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:local="using:Krypta.Client"
-    RequestedThemeVariant="Light">
+    RequestedThemeVariant="Dark">
+
+  <Application.Resources>
+    <ResourceDictionary>
+      <ResourceDictionary.ThemeDictionaries>
+        <ResourceDictionary x:Key="Light">
+          <SolidColorBrush x:Key="KryptaBackgroundBrush" Color="#EEF1F4" />
+          <SolidColorBrush x:Key="KryptaSurfaceBrush" Color="#FFFFFF" />
+          <SolidColorBrush x:Key="KryptaRaisedBrush" Color="#F7F9FB" />
+          <SolidColorBrush x:Key="KryptaLineBrush" Color="#D8DFE6" />
+          <SolidColorBrush x:Key="KryptaInkBrush" Color="#161B22" />
+          <SolidColorBrush x:Key="KryptaSecondaryInkBrush" Color="#3C4653" />
+          <SolidColorBrush x:Key="KryptaMutedBrush" Color="#5E6875" />
+          <SolidColorBrush x:Key="KryptaAccentBrush" Color="#4A3FBF" />
+          <SolidColorBrush x:Key="KryptaSuccessBrush" Color="#1B7A50" />
+          <SolidColorBrush x:Key="KryptaWarningBrush" Color="#8A5B00" />
+          <SolidColorBrush x:Key="KryptaDangerBrush" Color="#B3261E" />
+        </ResourceDictionary>
+        <ResourceDictionary x:Key="Dark">
+          <SolidColorBrush x:Key="KryptaBackgroundBrush" Color="#0A0D11" />
+          <SolidColorBrush x:Key="KryptaSurfaceBrush" Color="#0E1116" />
+          <SolidColorBrush x:Key="KryptaRaisedBrush" Color="#161B22" />
+          <SolidColorBrush x:Key="KryptaLineBrush" Color="#242C36" />
+          <SolidColorBrush x:Key="KryptaInkBrush" Color="#D7DDE5" />
+          <SolidColorBrush x:Key="KryptaSecondaryInkBrush" Color="#AEB8C4" />
+          <SolidColorBrush x:Key="KryptaMutedBrush" Color="#79838F" />
+          <SolidColorBrush x:Key="KryptaAccentBrush" Color="#A79BFF" />
+          <SolidColorBrush x:Key="KryptaSuccessBrush" Color="#3FB27F" />
+          <SolidColorBrush x:Key="KryptaWarningBrush" Color="#D9A441" />
+          <SolidColorBrush x:Key="KryptaDangerBrush" Color="#E05252" />
+        </ResourceDictionary>
+      </ResourceDictionary.ThemeDictionaries>
+    </ResourceDictionary>
+  </Application.Resources>
 
   <Application.DataTemplates>
     <local:ViewLocator />

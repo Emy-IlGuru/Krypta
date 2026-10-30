@@ -1,6 +1,7 @@
 using System.Net.WebSockets;
 using System.Text;
 using System.Text.Json;
+using Krypta.Client.Configuration;
 using Krypta.Shared;
 using Krypta.Shared.Protocol;
 
@@ -97,7 +98,7 @@ public sealed class KryptaConnection : IAsyncDisposable
             throw new ArgumentOutOfRangeException(nameof(port));
         }
 
-        if (!useTls && !string.Equals(host, "127.0.0.1", StringComparison.Ordinal))
+        if (!useTls && !CleartextPolicy.AllowsCleartext(host))
         {
             throw new InvalidOperationException(
                 "La connessione senza TLS è ammessa solo verso 127.0.0.1.");

@@ -4,33 +4,12 @@ namespace Krypta.Server.Rooms;
 
 public static class NicknameAllocator
 {
-    private static readonly HashSet<string> ReservedNames = new(
-        ["STANZA", "KRYPTA", "SISTEMA", "SYSTEM", "SERVER", "ROOM"],
-        StringComparer.OrdinalIgnoreCase);
-
     /// <summary>
     /// Valida il nickname e restituisce l'unica normalizzazione consentita: il trim.
+    /// Le regole stanno in <see cref="NicknameRules"/>, condivise col client.
     /// </summary>
-    public static bool TryNormalize(string? requested, out string? normalized)
-    {
-        normalized = null;
-        if (requested is null)
-        {
-            return false;
-        }
-
-        string candidate = requested.Trim();
-        if (candidate.Length is < KryptaLimits.NicknameMinLength
-            or > KryptaLimits.NicknameMaxLength
-            || ReservedNames.Contains(candidate)
-            || !HasValidCharacters(candidate))
-        {
-            return false;
-        }
-
-        normalized = candidate;
-        return true;
-    }
+    public static bool TryNormalize(string? requested, out string? normalized) =>
+        NicknameRules.TryNormalize(requested, out normalized);
 
     /// <summary>
     /// Restituisce il nickname libero più vicino a quello richiesto.
@@ -69,35 +48,5 @@ public static class NicknameAllocator
         }
 
         throw new InvalidOperationException("Non è disponibile un nickname valido.");
-    }
-
-    private static bool HasValidCharacters(string value)
-    {
-        bool previousWasSpace = false;
-
-        foreach (char character in value)
-        {
-            bool isAsciiToken = character is >= 'A' and <= 'Z'
-                or >= 'a' and <= 'z'
-                or >= '0' and <= '9'
-                or '_'
-                or '.'
-                or '-';
-
-            if (isAsciiToken)
-            {
-                previousWasSpace = false;
-                continue;
-            }
-
-            if (character != ' ' || previousWasSpace)
-            {
-                return false;
-            }
-
-            previousWasSpace = true;
-        }
-
-        return true;
     }
 }
