@@ -137,6 +137,14 @@ public sealed class AccountViewModel : ViewModelBase, IRoutableViewModel
 
         StatusMessage = saved.Warning ?? string.Empty;
         this.RaisePropertyChanged(nameof(HasStatus));
+
+        // Un eventuale avviso di salvataggio l'utente l'ha già visto nella [1]: non vale
+        // un secondo blocco del flusso, la configurazione è una comodità.
+        await HostScreen.Router.Navigate.Execute(new RoomViewModel(
+            HostScreen,
+            _Connection,
+            _Session,
+            normalized!));
     }
 
     private async Task DisconnectAsync()

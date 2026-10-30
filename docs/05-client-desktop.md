@@ -769,7 +769,7 @@ MainWindowViewModel : ViewModelBase, IScreen
 ├── RoomViewModel         RoomId, JoinMessage, JoinCommand, ErrorMessage, RetryCountdown
 ├── PendingViewModel      RoomId, SentJoinMessage, ExpiresIn, CancelCommand
 └── ChatViewModel         RoomName, RoomId, ParticipantCount, MaxParticipants,
-                          MyNickname, Messages : ObservableCollection<ChatEntry>,
+                          MyNickname, Messages : ObservableCollection<ChatLine>,
                           Waiting : ObservableCollection<WaitingRequest>,
                                     (Nickname, JoinMessage?, VerificationCode,
                                      WaitingSeconds, RequestId)
@@ -780,6 +780,11 @@ MainWindowViewModel : ViewModelBase, IScreen
 `ChatEntry` è il tipo unico per l'area messaggi, con tre varianti: messaggio utente,
 messaggio di sistema, messaggio locale (errori di comando). Un solo `DataTemplate` con
 selettore, così l'ordine cronologico è garantito da una sola collezione.
+
+`ChatLine` è la coppia `ChatEntry` + pennello del mittente. Il colore dipende dal **tema**,
+che non è una proprietà della voce: tenerlo dentro `ChatEntry` legherebbe il modello al
+tema al momento della costruzione, e un cambio di tema a runtime lascerebbe righe vecchie
+di un colore e nuove di un altro. La coppia si costruisce nel ViewModel, dove il tema si sa.
 
 `KryptaConnection` è l'unico punto che tocca il WebSocket. Espone eventi
 (`Joined`, `MessageReceived`, `SystemReceived`, `ClearReceived`, `ParticipantsChanged`,

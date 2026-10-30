@@ -1,0 +1,148 @@
+<UserControl
+    x:Class="Krypta.Client.Views.RoomView"
+    x:DataType="vm:RoomViewModel"
+    xmlns="https://github.com/avaloniaui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:vm="using:Krypta.Client.ViewModels">
+
+  <Grid Background="{DynamicResource KryptaBackgroundBrush}">
+    <Border
+        MaxWidth="500"
+        Margin="24"
+        Padding="54,36"
+        HorizontalAlignment="Center"
+        VerticalAlignment="Center"
+        Background="{DynamicResource KryptaSurfaceBrush}"
+        BorderBrush="{DynamicResource KryptaLineBrush}"
+        BorderThickness="1"
+        CornerRadius="11">
+
+      <StackPanel Width="344">
+        <Grid ColumnDefinitions="*,Auto" VerticalAlignment="Center">
+          <TextBlock
+              VerticalAlignment="Center"
+              FontSize="12.5"
+              Foreground="{DynamicResource KryptaMutedBrush}"
+              Text="{Binding Nickname, StringFormat='Sei {0}'}"
+              TextTrimming="CharacterEllipsis" />
+          <Button
+              Grid.Column="1"
+              Padding="12,6"
+              Background="Transparent"
+              BorderBrush="{DynamicResource KryptaLineBrush}"
+              BorderThickness="1"
+              Command="{Binding ChangeNicknameCommand}"
+              Content="Cambia"
+              CornerRadius="7"
+              FontSize="12"
+              Foreground="{DynamicResource KryptaSecondaryInkBrush}" />
+        </Grid>
+
+        <TextBlock
+            Margin="0,26,0,6"
+            FontSize="12.5"
+            FontWeight="Medium"
+            Foreground="{DynamicResource KryptaSecondaryInkBrush}"
+            Text="ID della stanza" />
+        <Grid ColumnDefinitions="*,Auto" ColumnSpacing="10">
+          <TextBox
+              x:Name="RoomIdTextBox"
+              MaxLength="6"
+              Padding="12,10"
+              Background="{DynamicResource KryptaBackgroundBrush}"
+              BorderBrush="{DynamicResource KryptaLineBrush}"
+              CornerRadius="7"
+              FontFamily="Cascadia Mono,Consolas"
+              FontSize="17"
+              IsEnabled="{Binding CanEdit}"
+              LetterSpacing="3"
+              Text="{Binding RoomId, Mode=TwoWay}"
+              Watermark="K7X2M9" />
+          <Button
+              Grid.Column="1"
+              Padding="16,10"
+              Background="Transparent"
+              BorderBrush="{DynamicResource KryptaLineBrush}"
+              BorderThickness="1"
+              Command="{Binding GenerateIdCommand}"
+              Content="Genera"
+              CornerRadius="7"
+              Foreground="{DynamicResource KryptaSecondaryInkBrush}" />
+        </Grid>
+        <TextBlock
+            Margin="0,7,0,0"
+            FontSize="12"
+            Foreground="{DynamicResource KryptaMutedBrush}"
+            Text="Sei caratteri: lettere o numeri. Crea prima, condividi poi."
+            TextWrapping="Wrap" />
+
+        <TextBlock
+            Margin="0,20,0,6"
+            FontSize="12.5"
+            FontWeight="Medium"
+            Foreground="{DynamicResource KryptaSecondaryInkBrush}"
+            Text="Messaggio per chi ti dovrà accettare" />
+        <TextBox
+            x:Name="JoinMessageTextBox"
+            MaxLength="200"
+            Padding="12,10"
+            AcceptsReturn="False"
+            Background="{DynamicResource KryptaBackgroundBrush}"
+            BorderBrush="{DynamicResource KryptaLineBrush}"
+            CornerRadius="7"
+            IsEnabled="{Binding CanEdit}"
+            Text="{Binding JoinMessage, Mode=TwoWay}" />
+        <Grid Margin="0,7,0,0" ColumnDefinitions="*,Auto" ColumnSpacing="10">
+          <TextBlock
+              FontSize="12"
+              Foreground="{DynamicResource KryptaMutedBrush}"
+              Text="Lo leggono solo i partecipanti, dal loro pannello. Non è cifrato: lo vede anche chi gestisce il server."
+              TextWrapping="Wrap" />
+          <TextBlock
+              Grid.Column="1"
+              VerticalAlignment="Bottom"
+              FontFamily="Cascadia Mono,Consolas"
+              FontSize="12"
+              Foreground="{DynamicResource KryptaMutedBrush}"
+              Text="{Binding JoinMessageLength, StringFormat='{}{0}/200'}" />
+        </Grid>
+
+        <TextBlock
+            Margin="0,20,0,0"
+            FontSize="12"
+            Foreground="{DynamicResource KryptaSecondaryInkBrush}"
+            Text="Se la stanza non esiste, la crei ed entri subito. Se esiste, dovrai aspettare che qualcuno già dentro ti accetti. In entrambi i casi non vedrai i messaggi scambiati prima del tuo ingresso."
+            TextWrapping="Wrap" />
+
+        <Grid Margin="0,22,0,0" ColumnDefinitions="*,Auto" ColumnSpacing="14">
+          <StackPanel VerticalAlignment="Center" Spacing="6">
+            <TextBlock
+                FontSize="12"
+                Foreground="{DynamicResource KryptaDangerBrush}"
+                IsVisible="{Binding HasError}"
+                Text="{Binding ErrorMessage}"
+                TextWrapping="Wrap" />
+            <TextBlock
+                FontSize="12"
+                Foreground="{DynamicResource KryptaSuccessBrush}"
+                IsVisible="{Binding HasStatus}"
+                Text="{Binding StatusMessage}"
+                TextWrapping="Wrap" />
+          </StackPanel>
+          <Button
+              Grid.Column="1"
+              MinWidth="112"
+              Padding="20,11"
+              VerticalAlignment="Bottom"
+              HorizontalContentAlignment="Center"
+              Background="{DynamicResource KryptaInkBrush}"
+              Command="{Binding JoinCommand}"
+              Content="{Binding JoinButtonText}"
+              Foreground="{DynamicResource KryptaSurfaceBrush}"
+              IsDefault="True"
+              IsEnabled="{Binding CanJoin}" />
+        </Grid>
+      </StackPanel>
+    </Border>
+  </Grid>
+</UserControl>

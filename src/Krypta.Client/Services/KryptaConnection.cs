@@ -2,6 +2,7 @@ using System.Net.WebSockets;
 using System.Text;
 using System.Text.Json;
 using Krypta.Client.Configuration;
+using Krypta.Client.Crypto;
 using Krypta.Shared;
 using Krypta.Shared.Protocol;
 
@@ -28,6 +29,7 @@ public sealed class KryptaConnection : IAsyncDisposable
     private readonly SemaphoreSlim _SendGate = new(1, 1);
 
     private IWebSocketTransport? _Transport;
+    private SessionKeys? _SessionKeys;
     private CancellationTokenSource? _ConnectionCancellation;
     private Task? _ReceiveTask;
     private Task? _HeartbeatTask;
@@ -145,6 +147,10 @@ public sealed class KryptaConnection : IAsyncDisposable
 
             CancellationTokenSource connectionCancellation = new();
             _Transport = transport;
+
+            // La coppia effimera vive quanto il socket: una riconnessione ne genera
+            // un'altra, e l'uscita la distrugge insieme al resto dello stato.
+            _SessionKeys = new SessionKeys();
             _ConnectionCancellation = connectionCancellation;
             _LastPingTimestamp = _TimeProvider.GetTimestamp();
             Interlocked.Exchange(ref _DisconnectNotified, 0);
@@ -157,15 +163,29 @@ public sealed class KryptaConnection : IAsyncDisposable
         }
     }
 
+    /// <summary>
+    /// La chiave pubblica di sessione, come punto X9.63 in base64. È <c>null</c> finché
+    /// non c'è una connessione aperta.
+    /// </summary>
+    public string? SessionPublicKey => _SessionKeys?.PublicKey;
+
+    /// <summary>
+    /// La <c>publicKey</c> non è un parametro di proposito: è sempre e solo quella della
+    /// sessione corrente, e lasciarla scegliere a chi chiama sarebbe un modo per sbagliarla.
+    /// </summary>
     public Task JoinAsync(
         string roomId,
         string nickname,
-        string publicKey,
         string? joinMessage = null,
-        CancellationToken cancellationToken = default) =>
-        SendAsync(
+        CancellationToken cancellationToken = default)
+    {
+        string publicKey = _SessionKeys?.PublicKey
+            ?? throw new InvalidOperationException("Il client non è connesso.");
+
+        return SendAsync(
             new JoinClientMessage(roomId, nickname, publicKey, joinMessage),
             cancellationToken);
+    }
 
     public Task ApproveAsync(
         Guid requestId,
@@ -500,6 +520,8 @@ public sealed class KryptaConnection : IAsyncDisposable
 
     private void ClearConnectionState()
     {
+        _SessionKeys?.Dispose();
+        _SessionKeys = null;
         _Transport = null;
         _ConnectionCancellation = null;
         _ReceiveTask = null;

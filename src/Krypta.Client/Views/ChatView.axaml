@@ -1,0 +1,141 @@
+<UserControl
+    x:Class="Krypta.Client.Views.ChatView"
+    x:DataType="vm:ChatViewModel"
+    xmlns="https://github.com/avaloniaui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:chat="using:Krypta.Client.Chat"
+    xmlns:vm="using:Krypta.Client.ViewModels">
+
+  <Grid Background="{DynamicResource KryptaBackgroundBrush}" RowDefinitions="Auto,*,Auto">
+
+    <!-- Fascia 1 — intestazione -->
+    <Border
+        Padding="20,14"
+        Background="{DynamicResource KryptaSurfaceBrush}"
+        BorderBrush="{DynamicResource KryptaLineBrush}"
+        BorderThickness="0,0,0,1">
+      <Grid ColumnDefinitions="Auto,Auto,*,Auto,Auto" ColumnSpacing="12">
+        <TextBlock
+            VerticalAlignment="Center"
+            FontSize="14"
+            FontWeight="SemiBold"
+            Foreground="{DynamicResource KryptaInkBrush}"
+            Text="{Binding RoomName}" />
+        <TextBlock
+            Grid.Column="1"
+            VerticalAlignment="Center"
+            FontFamily="Cascadia Mono,Consolas"
+            FontSize="12.5"
+            Foreground="{DynamicResource KryptaMutedBrush}"
+            Text="{Binding RoomId, StringFormat='#{0}'}" />
+        <TextBlock
+            Grid.Column="2"
+            Margin="8,0,0,0"
+            VerticalAlignment="Center"
+            FontSize="11.5"
+            Foreground="{DynamicResource KryptaWarningBrush}"
+            Text="{Binding EncryptionLabel}"
+            TextTrimming="CharacterEllipsis" />
+        <TextBlock
+            Grid.Column="3"
+            VerticalAlignment="Center"
+            FontFamily="Cascadia Mono,Consolas"
+            FontSize="12"
+            Foreground="{DynamicResource KryptaMutedBrush}"
+            Text="{Binding ParticipantLabel}" />
+        <Button
+            Grid.Column="4"
+            Padding="12,6"
+            Background="Transparent"
+            BorderBrush="{DynamicResource KryptaLineBrush}"
+            BorderThickness="1"
+            Command="{Binding LeaveCommand}"
+            Content="Lascia stanza"
+            CornerRadius="7"
+            FontSize="12"
+            Foreground="{DynamicResource KryptaSecondaryInkBrush}" />
+      </Grid>
+    </Border>
+
+    <!-- Fascia 2 — area messaggi, due righe per messaggio -->
+    <ScrollViewer Grid.Row="1" Padding="20,16">
+      <ItemsControl ItemsSource="{Binding Messages}">
+        <ItemsControl.ItemTemplate>
+          <DataTemplate x:DataType="chat:ChatLine">
+            <StackPanel Margin="0,0,0,14">
+              <StackPanel Orientation="Horizontal" Spacing="6">
+                <TextBlock
+                    FontFamily="Cascadia Mono,Consolas"
+                    FontSize="12.5"
+                    Foreground="{DynamicResource KryptaMutedBrush}"
+                    Text="--" />
+                <TextBlock
+                    FontFamily="Cascadia Mono,Consolas"
+                    FontSize="12.5"
+                    FontWeight="SemiBold"
+                    Foreground="{Binding SenderBrush}"
+                    Text="{Binding Sender}" />
+                <TextBlock
+                    FontFamily="Cascadia Mono,Consolas"
+                    FontSize="12.5"
+                    Foreground="{DynamicResource KryptaMutedBrush}"
+                    Text="---" />
+              </StackPanel>
+              <SelectableTextBlock
+                  Margin="0,2,0,0"
+                  FontSize="13.5"
+                  Foreground="{DynamicResource KryptaInkBrush}"
+                  Text="{Binding Text}"
+                  TextWrapping="Wrap" />
+            </StackPanel>
+          </DataTemplate>
+        </ItemsControl.ItemTemplate>
+      </ItemsControl>
+    </ScrollViewer>
+
+    <!-- Fascia 3 — composizione -->
+    <Border
+        Grid.Row="2"
+        Padding="20,14"
+        Background="{DynamicResource KryptaSurfaceBrush}"
+        BorderBrush="{DynamicResource KryptaLineBrush}"
+        BorderThickness="0,1,0,0">
+      <Grid ColumnDefinitions="*,Auto" ColumnSpacing="12" RowDefinitions="Auto,Auto">
+        <TextBox
+            x:Name="DraftTextBox"
+            MaxHeight="120"
+            Padding="12,10"
+            AcceptsReturn="True"
+            Background="{DynamicResource KryptaBackgroundBrush}"
+            BorderBrush="{DynamicResource KryptaLineBrush}"
+            CornerRadius="7"
+            KeyDown="OnDraftKeyDown"
+            Text="{Binding Draft, Mode=TwoWay}"
+            TextWrapping="Wrap"
+            Watermark="Scrivi un messaggio…" />
+        <Button
+            Grid.Column="1"
+            MinWidth="92"
+            Padding="18,11"
+            VerticalAlignment="Bottom"
+            HorizontalContentAlignment="Center"
+            Background="{DynamicResource KryptaInkBrush}"
+            Command="{Binding SendCommand}"
+            Content="Invia"
+            Foreground="{DynamicResource KryptaSurfaceBrush}"
+            IsEnabled="{Binding CanSend}" />
+        <TextBlock
+            Grid.Row="1"
+            Margin="4,6,0,0"
+            FontFamily="Cascadia Mono,Consolas"
+            FontSize="11.5"
+            IsVisible="{Binding ShowDraftCounter}"
+            Text="{Binding DraftLength, StringFormat='{}{0}/2000'}">
+          <TextBlock.Foreground>
+            <SolidColorBrush Color="#79838F" />
+          </TextBlock.Foreground>
+        </TextBlock>
+      </Grid>
+    </Border>
+  </Grid>
+</UserControl>

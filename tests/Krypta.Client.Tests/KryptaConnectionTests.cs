@@ -1,6 +1,7 @@
 using System.Text.Json;
 using Krypta.Client.Services;
 using Krypta.Client.Tests.TestDoubles;
+using Krypta.Shared;
 using Krypta.Shared.Protocol;
 
 namespace Krypta.Client.Tests;
@@ -43,7 +44,7 @@ public sealed class KryptaConnectionTests
         await using KryptaConnection connection = Create(transport, dispatcher);
         await connection.ConnectAsync("127.0.0.1", 5000, useTls: false);
 
-        await connection.JoinAsync("K7X2M9", "emy", "public-key", "fammi entrare");
+        await connection.JoinAsync("K7X2M9", "emy", "fammi entrare");
 
         string json = Assert.Single(transport.SentMessages);
         ClientMessage? message = JsonSerializer.Deserialize(
@@ -52,6 +53,13 @@ public sealed class KryptaConnectionTests
         JoinClientMessage join = Assert.IsType<JoinClientMessage>(message);
         Assert.Equal("K7X2M9", join.RoomId);
         Assert.Equal("fammi entrare", join.JoinMessage);
+
+        // La chiave pubblica è quella di sessione, non un parametro: 65 byte X9.63 in
+        // base64, primo byte 0x04 (03 §7bis.9). È la stessa che il server valida.
+        Assert.Equal(connection.SessionPublicKey, join.PublicKey);
+        byte[] point = Convert.FromBase64String(join.PublicKey);
+        Assert.Equal(KryptaLimits.PublicKeyBytes, point.Length);
+        Assert.Equal(0x04, point[0]);
     }
 
     [Fact]
